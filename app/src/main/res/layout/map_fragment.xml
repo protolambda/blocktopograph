@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#494E8E">
+
+    <RelativeLayout
+        android:id="@+id/world_tileview_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </RelativeLayout>
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:padding="4dp"
+        tools:ignore="RtlHardcoded">
+        <!-- shadow is not supported in android studio preview -->
+        <TextView
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/map_water_mark"
+            android:textStyle="normal"
+            android:shadowColor="@color/waterMarkShadow"
+            android:shadowRadius="2.0"
+            android:shadowDx="2.0"
+            android:shadowDy="2.0"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/waterMark" />
+
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:ignore="RtlHardcoded"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:gravity="bottom"
+        android:layout_alignParentRight="true">
+
+            <com.github.clans.fab.FloatingActionMenu
+                android:id="@+id/fab_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|right"
+                android:layout_margin="@dimen/fab_margin"
+                fab:menu_colorNormal="@color/colorAccent"
+                fab:menu_colorPressed="@color/colorAccent">
+
+
+                <com.github.clans.fab.FloatingActionButton
+                    android:id="@+id/fab_menu_gps_coord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_gps_fixed"
+                    style="@style/MenuButtonsStyle"
+                    fab:fab_label="Go to coordinate" />
+
+                <com.github.clans.fab.FloatingActionButton
+                    android:id="@+id/fab_menu_gps_marker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_location"
+                    style="@style/MenuButtonsStyle"
+                    fab:fab_label="Go to custom marker" />
+
+                <com.github.clans.fab.FloatingActionButton
+                    android:id="@+id/fab_menu_gps_spawn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_action_home"
+                    style="@style/MenuButtonsStyle"
+                    fab:fab_label="Go to spawn" />
+
+                <com.github.clans.fab.FloatingActionButton
+                    android:id="@+id/fab_menu_gps_player"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_emoticon"
+                    style="@style/MenuButtonsStyle"
+                    fab:fab_label="Go to local player" />
+
+                <com.github.clans.fab.FloatingActionButton
+                    android:id="@+id/fab_menu_gps_multiplayer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_people_outline"
+                    style="@style/MenuButtonsStyle"
+                    fab:fab_label="Go to other player" />
+
+            </com.github.clans.fab.FloatingActionMenu>
+
+    </LinearLayout>
+
+
+</RelativeLayout>

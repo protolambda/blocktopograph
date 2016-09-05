@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_world_show_map"
+            android:icon="@drawable/ic_action_map_b"
+            android:title="Show map" />
+        <item
+            android:id="@+id/nav_world_select"
+            android:icon="@drawable/ic_action_exit"
+            android:title="Select world" />
+        <item
+            android:id="@+id/nav_singleplayer_nbt"
+            android:icon="@drawable/ic_person"
+            android:title="Singleplayer NBT" />
+        <item
+            android:id="@+id/nav_multiplayer_nbt"
+            android:icon="@drawable/ic_people"
+            android:title="Multiplayer NBT" />
+        <!--<item
+            android:id="@+id/nav_inventory"
+            android:icon="@drawable/ic_inventory"
+            android:title="Inventory" />-->
+        <item
+            android:id="@+id/nav_world_nbt"
+            android:icon="@drawable/ic_action_settings"
+            android:title="World NBT" />
+        <!--<item
+            android:id="@+id/nav_tools"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Tools" />-->
+    </group>
+
+    <group android:checkableBehavior="none">
+        <item android:title="Overworld">
+            <menu>
+                <item
+                    android:id="@+id/nav_overworld_satellite"
+                    android:icon="@drawable/ic_satellite"
+                    android:title="Satellite" />
+                <item
+                    android:id="@+id/nav_overworld_cave"
+                    android:icon="@drawable/ic_broken_image"
+                    android:title="Cave" />
+                <!--<item
+                    android:id="@+id/nav_overworld_debug"
+                    android:icon="@drawable/ic_terrain"
+                    android:title="Debug" />-->
+                <item
+                    android:id="@+id/nav_overworld_slime_chunk"
+                    android:icon="@drawable/ic_action_puzzle"
+                    android:title="Slime-chunks" />
+                <item
+                    android:id="@+id/nav_overworld_heightmap"
+                    android:icon="@drawable/ic_terrain"
+                    android:title="Heightmap" />
+                <item
+                    android:id="@+id/nav_overworld_biome"
+                    android:icon="@drawable/ic_bubble_chart"
+                    android:title="Biomes" />
+                <item
+                    android:id="@+id/nav_overworld_grass"
+                    android:icon="@drawable/ic_gradient"
+                    android:title="Foliage color" />
+                <item
+                    android:id="@+id/nav_overworld_xray"
+                    android:icon="@drawable/ic_visibility"
+                    android:title="X-Ray" />
+                <item
+                    android:id="@+id/nav_overworld_block_light"
+                    android:icon="@drawable/ic_settings_brightness"
+                    android:title="Light" />
+            </menu>
+        </item>
+    </group>
+
+    <group android:checkableBehavior="none">
+        <item android:title="Nether">
+            <menu>
+                <item
+                    android:id="@+id/nav_nether_map"
+                    android:icon="@drawable/ic_action_map_b"
+                    android:title="Map" />
+                <item
+                    android:id="@+id/nav_nether_xray"
+                    android:icon="@drawable/ic_visibility"
+                    android:title="X-Ray" />
+                <item
+                    android:id="@+id/nav_nether_block_light"
+                    android:icon="@drawable/ic_settings_brightness"
+                    android:title="Light" />
+            </menu>
+        </item>
+    </group>
+
+    <group android:checkableBehavior="none">
+        <item android:title="Map options">
+            <menu>
+                <item
+                    android:id="@+id/nav_map_opt_toggle_grid"
+                    android:icon="@drawable/ic_grid_on"
+                    android:title="Toggle grid" />
+                <item
+                    android:id="@+id/nav_map_opt_toggle_markers"
+                    android:icon="@drawable/ic_place"
+                    android:title="Toggle markers" />
+            </menu>
+        </item>
+    </group>
+
+    <group android:checkableBehavior="none">
+        <item android:title="Advanced">
+            <menu>
+                <item
+                    android:id="@+id/nav_biomedata_nbt"
+                    android:icon="@drawable/ic_action_list"
+                    android:title="BiomeData NBT" />
+                <item
+                    android:id="@+id/nav_overworld_nbt"
+                    android:icon="@drawable/ic_action_list"
+                    android:title="Overworld NBT" />
+                <item
+                    android:id="@+id/nav_villages_nbt"
+                    android:icon="@drawable/ic_action_list"
+                    android:title="Villages NBT" />
+                <item
+                    android:id="@+id/nav_portals_nbt"
+                    android:icon="@drawable/ic_action_list"
+                    android:title="Portals NBT" />
+                <item
+                    android:id="@+id/nav_open_nbt_by_name"
+                    android:icon="@drawable/ic_action_search"
+                    android:title="Open NBT by name" />
+            </menu>
+        </item>
+    </group>
+
+
+</menu>

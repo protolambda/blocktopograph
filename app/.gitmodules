@@ -1,0 +1,3 @@
+[submodule "src/main/jni/leveldb-mcpe"]
+	path = src/main/jni/leveldb-mcpe
+	url = https://github.com/protolambda/leveldb-mcpe.git

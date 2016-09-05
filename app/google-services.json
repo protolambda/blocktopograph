@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "564656650140",
+    "firebase_url": "https://blocktopograph.firebaseio.com",
+    "project_id": "blocktopograph",
+    "storage_bucket": "blocktopograph.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564656650140:android:eb6fd65e19ba58a2",
+        "android_client_info": {
+          "package_name": "com.protolambda.blocktopograph"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "564656650140-f2ium4c34cdk331bpr5btkf1s35o8psf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXuQPvJEGpPAQAh3Mdn8lQ8exsEjDTv_c"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

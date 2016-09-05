@@ -1,0 +1,185 @@
+package com.protolambda.blocktopograph.worldlist;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import com.protolambda.blocktopograph.R;
+import com.protolambda.blocktopograph.World;
+import com.protolambda.blocktopograph.WorldActivity;
+import com.protolambda.blocktopograph.WorldItemListActivity;
+import com.protolambda.blocktopograph.nbt.tags.LongTag;
+
+/**
+ * A fragment representing a single WorldItem detail screen.
+ * This fragment is either contained in a {@link WorldItemListActivity}
+ * in two-pane mode (on tablets) or a {@link WorldItemDetailActivity}
+ * on handsets.
+ */
+public class WorldItemDetailFragment extends Fragment {
+
+    /**
+     * The dummy content this fragment is presenting.
+     */
+    private World world;
+
+    /**
+     * Mandatory empty constructor for the fragment manager to instantiate the
+     * fragment (e.g. upon screen orientation changes).
+     */
+    public WorldItemDetailFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
+    private String getDate(long time) {
+        Calendar cal = Calendar.getInstance();
+        TimeZone tz = cal.getTimeZone();//get your local time zone.
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.ENGLISH);
+        sdf.setTimeZone(tz);//set time zone.
+        return sdf.format(new Date(time * 1000));
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+
+        Activity activity = this.getActivity();
+
+        String barTitle;
+        if(!getArguments().containsKey(World.ARG_WORLD_SERIALIZED)){
+            Snackbar.make(activity.findViewById(R.id.worlditem_detail),
+                    "Error: could not open world details; missing world-item.", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            barTitle = "Error: could not open world.";
+        } else {
+
+            world = (World) getArguments().getSerializable(World.ARG_WORLD_SERIALIZED);
+            barTitle = world ==null ? "Error: could not open world." : world.getWorldDisplayName();
+        }
+
+        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+        if (appBarLayout != null) {
+            appBarLayout.setTitle(barTitle);
+        }
+
+
+
+        View rootView = inflater.inflate(R.layout.worlditem_detail, container, false);
+
+        if (world != null) {
+            String detailText = "no level-data available";
+            try {
+                if (world.level != null)
+                    detailText = "World name: "+world.getWorldDisplayName()+"\n Last time played: "
+                            + getDate(((LongTag) world.level.getChildTagByKey("LastPlayed")).getValue());
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            ((TextView) rootView.findViewById(R.id.worlditem_detail)).setText(detailText);
+        }
+
+
+        FloatingActionButton fabOpenWorld = (FloatingActionButton) rootView.findViewById(R.id.fab_open_world);
+        assert fabOpenWorld != null;
+        fabOpenWorld.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Loading world...", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+                Context context = view.getContext();
+                Intent intent = new Intent(context, WorldActivity.class);
+                intent.putExtra(World.ARG_WORLD_SERIALIZED, world);
+
+                context.startActivity(intent);
+            }
+        });
+/*
+// Debug button to write small worlds in an easily readable format
+    WARNING: DO NOT USE ON LARGE WORLDS (The debug output will get way larger than the world!)
+
+
+        FloatingActionButton fabDevMode = (FloatingActionButton) rootView.findViewById(R.id.fab_dev_mode);
+        assert fabDevMode != null;
+        fabDevMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Outputting world...", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+                World.WorldData wData = world.getWorldData();
+
+
+
+                File outputFile = new File(world.worldFolder, "debug_hex_out.txt");
+
+                try {
+
+                    wData.load();
+                    wData.openDB();
+                    Iterator it = wData.db.iterator();
+
+                    BufferedWriter buf = new BufferedWriter(new FileWriter(outputFile, false), 1024);
+
+                    for(it.seekToFirst(); it.isValid(); it.next()){
+                        byte[] key = it.getKey();
+                        byte[] value = it.getValue();
+
+                        buf.newLine();
+                        buf.newLine();
+                        buf.write("========================");
+                        buf.newLine();
+                        buf.write("key: " + new String(key));
+                        buf.newLine();
+                        buf.write("key in Hex: " + World.WorldData.bytesToHex(key, 0, key.length));
+                        buf.newLine();
+                        buf.write("------------------------");
+                        buf.newLine();
+                        for(int i =0; i < value.length; i += 256){
+                            buf.write(World.WorldData.bytesToHex(value, i, Math.min(i + 256, value.length)));
+                            buf.newLine();
+                        }
+
+                    }
+
+                    buf.close();
+
+                    it.close();
+                    wData.closeDB();
+
+                }
+                catch (Exception e) {
+                    Log.e("Failed writing debug file to "+outputFile.getAbsolutePath()+"\n" + e.toString());
+                }
+
+                Snackbar.make(view, "Done outputting world!!! Path: "+outputFile.getAbsolutePath(), Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+            }
+        });
+*/
+        return rootView;
+    }
+}
+
