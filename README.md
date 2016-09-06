@@ -4,7 +4,7 @@ By @protolambda.
 
 *Documentation coming SOON*
 
-
+*update*: build.gradle improvements coming SOON.
 
 
 ## LICENSE
