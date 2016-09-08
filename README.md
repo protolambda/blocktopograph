@@ -2,9 +2,76 @@
 
 By @protolambda.
 
-*Documentation coming SOON*
+## [Download on Google-Play](https://play.google.com/store/apps/details?id=com.protolambda.blocktopograph)
 
-*update*: gradle build has been fixed
+### Screenshots
+
+//TODO screenshots
+
+
+### Showcase website
+
+Screenshots, download links, roadmap etc. can all be found on [blocktopograph.protolambda.com](https://blocktopograph.protolambda.com).
+
+//TODO update website.
+
+
+## Get-started
+
+Steps to get started quickly:
+
+### Get-started: pre-installation
+
+This project requires you to download some android SDKs, tools, libraries and drivers.
+
+- SDKs + Tools: please check the sdk version before cloning a repo, then install sdk+tools for this version with SDK-manager.
+- Libraries: You need to install the google-services and google-repository libraries with SDK-manager.
+- Drivers: download the appropriate drivers for your phone to use `adb`.
+    The SDK-manager provides windows drivers for the Nexus phones.
+- Some libraries are downloaded by gradle itself. You do not have to worry about these.
+- Sub-modules are managed with git. (See installation)
+
+
+### Get-started: installation
+
+NOTE: You may want to fork one of the dependencies (or this project) if you want to contribute.
+
+1. `mkdir block-project` or something like that. This will be the main-container
+1. `cd` into the new folder
+1. `git clone` (your fork of) this repository
+1. `git clone` (your fork of) [android-leveldb](https://github.com/protolambda/android-leveldb)
+1. `cd android-leveldb` and `git submodule update` to get the
+    [leveldb-mcpe](https://github.com/protolambda/leveldb-mcpe) git-submodule, it is required for building this project.
+1. `cd ..` (back to the main container)
+1. `git clone` (your fork of) [TileView](https://github.com/protolambda/TileView)
+1. Add `local.properties` files to these projects,
+    with `sdk.dir` for your sdk home,
+    and with `ndk.dir` specified for `android-leveldb`.
+1. Open the cloned blocktopograph repo with your IDE (android-studio and intellij-idea are tested).
+    The blocktopograph repo should be the `root-module`;
+     `app`, `library`(android-leveldb) and `tileview`(TileView) will be recognized as sub-modules.
+1. Build the project with gradle
+1. Make the project, to get android-leveldb native libs.
+1. Switch build-variants of the projects you want to debug and rebuild with gradle (or leave them as is)
+1. Good to go! Try running a debug build (`app` submodule)! Start with small-changes to see if you encounter any problems.
+
+
+### Release-Workflow
+
+The official Google-Play version is managed by @protolambda. The Release-signing keys are not available.
+You can build it as debug build or sign it with your own keys.
+
+This Google-Play version will be updated after any significant and well-written feature additions and fixes.
+
+Questions? You can reach [@protolambda on Twitter](https://twitter.com/protolambda)!
+
+Issues and requests are welcome too, but please use the issue-tracker for this to keep things organized.
+
+
+### Wiki
+
+Reasonable wiki-suggestions are welcome; comments should be sufficient for most parts of this project.
+
 
 ## LICENSE
 
