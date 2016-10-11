@@ -54,7 +54,7 @@ public class WorldItemDetailFragment extends Fragment {
     private String getDate(long time) {
         Calendar cal = Calendar.getInstance();
         TimeZone tz = cal.getTimeZone();//get your local time zone.
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.ENGLISH);
+        SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.full_date_format), Locale.ENGLISH);
         sdf.setTimeZone(tz);//set time zone.
         return sdf.format(new Date(time * 1000));
     }
@@ -69,13 +69,13 @@ public class WorldItemDetailFragment extends Fragment {
         String barTitle;
         if(!getArguments().containsKey(World.ARG_WORLD_SERIALIZED)){
             Snackbar.make(activity.findViewById(R.id.worlditem_detail),
-                    "Error: could not open world details; missing world-item.", Snackbar.LENGTH_LONG)
+                    R.string.error_could_not_open_world_details_lost_track_world, Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
-            barTitle = "Error: could not open world.";
+            barTitle = activity.getString(R.string.error_could_not_open_world);
         } else {
 
             world = (World) getArguments().getSerializable(World.ARG_WORLD_SERIALIZED);
-            barTitle = world ==null ? "Error: could not open world." : world.getWorldDisplayName();
+            barTitle = world ==null ? activity.getString(R.string.error_could_not_open_world) : world.getWorldDisplayName();
         }
 
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
@@ -88,11 +88,10 @@ public class WorldItemDetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.worlditem_detail, container, false);
 
         if (world != null) {
-            String detailText = "no level-data available";
+            String detailText = activity.getString(R.string.no_level_data_available);
             try {
                 if (world.level != null)
-                    detailText = "World name: "+world.getWorldDisplayName()+"\n Last time played: "
-                            + getDate(((LongTag) world.level.getChildTagByKey("LastPlayed")).getValue());
+                    detailText = String.format(activity.getString(R.string.details_xWorld_yLastTimePlayed), world.getWorldDisplayName(), getDate(((LongTag) world.level.getChildTagByKey("LastPlayed")).getValue()));
             } catch (Exception e){
                 e.printStackTrace();
             }
@@ -105,7 +104,7 @@ public class WorldItemDetailFragment extends Fragment {
         fabOpenWorld.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Loading world...", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, R.string.loading_world, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
                 Context context = view.getContext();

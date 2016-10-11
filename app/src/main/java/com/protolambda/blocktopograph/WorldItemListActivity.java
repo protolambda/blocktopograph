@@ -71,14 +71,14 @@ public class WorldItemListActivity extends AppCompatActivity {
 
                 if(worldItemAdapter != null){
                     if(worldItemAdapter.reloadWorldList()) {
-                        Snackbar.make(view, "Reloaded world list.", Snackbar.LENGTH_SHORT)
+                        Snackbar.make(view, R.string.reloaded_world_list, Snackbar.LENGTH_SHORT)
                                 .setAction("Action", null).show();
                     } else {
-                        Snackbar.make(view, "Could not find any worlds!", Snackbar.LENGTH_LONG)
+                        Snackbar.make(view, R.string.could_not_find_worlds, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }
                 } else {
-                    Snackbar.make(view, "No read/write access to worlds.", Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, R.string.no_read_write_access, Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
 
@@ -94,13 +94,13 @@ public class WorldItemListActivity extends AppCompatActivity {
 
 
                 final EditText pathText = new EditText(WorldItemListActivity.this);
-                pathText.setHint("Storage path here...");
+                pathText.setHint(R.string.storage_path_here);
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(WorldItemListActivity.this);
-                alert.setTitle("Open world with custom path");
+                alert.setTitle(R.string.open_world_custom_path);
                 alert.setView(pathText);
 
-                alert.setPositiveButton("Open", new DialogInterface.OnClickListener() {
+                alert.setPositiveButton(R.string.open, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
 
                         //new tag name
@@ -118,15 +118,15 @@ public class WorldItemListActivity extends AppCompatActivity {
 
                         String defaultPath = Environment.getExternalStorageDirectory().toString()+"/games/com.mojang/minecraftWorlds/";
                         File worldFolder = new File(path);
-                        String errTitle = null, errMsg = "Your path: " + path + "\n\nAlready searched for world folders in "+defaultPath;
+                        String errTitle = null, errMsg = String.format(getString(R.string.report_path_and_previous_search), path, defaultPath);
                         if(!worldFolder.exists()){
-                            errTitle = "No file/folder found at path!";
+                            errTitle = getString(R.string.no_file_folder_found_at_path);
                         }
                         if(!worldFolder.isDirectory()){
-                            errTitle = "That path (optionally suffixed with /level.dat) is not a directory!";
+                            errTitle = getString(R.string.worldpath_is_not_directory);
                         }
                         if(!(new File(worldFolder, "level.dat").exists())){
-                            errTitle = "No level.dat file found!";
+                            errTitle = getString(R.string.no_level_dat_found);
                         }
                         if(errTitle != null) {
                             new AlertDialog.Builder(WorldItemListActivity.this)
@@ -156,7 +156,7 @@ public class WorldItemListActivity extends AppCompatActivity {
                                 }
 
                             } catch (Exception e){
-                                Snackbar.make(view, "An error occured while opening the world.", Snackbar.LENGTH_SHORT)
+                                Snackbar.make(view, R.string.error_opening_world, Snackbar.LENGTH_SHORT)
                                         .setAction("Action", null).show();
                             }
                         }
@@ -191,7 +191,7 @@ public class WorldItemListActivity extends AppCompatActivity {
         assert recyclerView != null;
         boolean hasWorlds = setupRecyclerView((RecyclerView) recyclerView);
         if(!hasWorlds){
-            Snackbar.make(recyclerView, "Could not find any worlds!", Snackbar.LENGTH_SHORT)
+            Snackbar.make(recyclerView, R.string.could_not_find_worlds, Snackbar.LENGTH_SHORT)
                     .setAction("Action", null).show();
         }
 

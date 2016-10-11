@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -219,7 +220,7 @@ public class MapFragment extends Fragment {
                 ImageView icon = (ImageView) v.findViewById(R.id.marker_icon);
 
                 name.setText(m.displayName);
-                String xzStr = "x: "+m.x+", y: "+m.y+", z: "+m.z;
+                String xzStr = String.format(Locale.ENGLISH, "x: %d, y: %d, z: %d", m.x, m.y, m.z);
                 xz.setText(xzStr);
 
                 m.loadIcon(icon, true);
@@ -255,7 +256,7 @@ public class MapFragment extends Fragment {
 
                     DimensionVector3<Float> playerPos = getPlayerPos();
 
-                    Snackbar.make(tileView, "Player at: ("+playerPos.x+"; "+playerPos.z+") ["+playerPos.dimension.name+"].", Snackbar.LENGTH_SHORT)
+                    Snackbar.make(tileView, String.format(getString(R.string.coordinates_xy_dimension), playerPos.x, playerPos.z, playerPos.dimension.name), Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
 
                     if(playerPos.dimension != worldProvider.getDimension()){
@@ -267,7 +268,7 @@ public class MapFragment extends Fragment {
                     frameTo((double) playerPos.x, (double) playerPos.z);
 
                 } catch (Exception e){
-                    Snackbar.make(view, e.getMessage(), Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, R.string.failed_find_player, Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
             }
@@ -296,7 +297,7 @@ public class MapFragment extends Fragment {
                     frameTo((double) spawnPos.x, (double) spawnPos.z);
 
                 } catch (Exception e){
-                    Snackbar.make(view, e.getMessage(), Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, R.string.failed_find_spawn, Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
             }
@@ -354,7 +355,7 @@ public class MapFragment extends Fragment {
 
                         AlertDialog.Builder markerDialogBuilder = new AlertDialog.Builder(activity);
                         markerDialogBuilder.setIcon(R.drawable.ic_place);
-                        markerDialogBuilder.setTitle("Go to a marker:");
+                        markerDialogBuilder.setTitle(R.string.go_to_a_marker_list);
 
                         final MarkerListAdapter arrayAdapter = new MarkerListAdapter(activity, markers);
 
@@ -368,7 +369,7 @@ public class MapFragment extends Fragment {
                                         AbstractMarker m = arrayAdapter.getItem(which);
 
                                         Snackbar.make(tileView,
-                                                m.displayName + " at: (" + m.x + "; " + m.z + ").",
+                                                String.format(Locale.ENGLISH, activity.getString(R.string.player_at_xy), m.displayName, m.x, m.z),
                                                 Snackbar.LENGTH_SHORT)
                                                 .setAction("Action", null).show();
 
@@ -402,13 +403,13 @@ public class MapFragment extends Fragment {
             public void onClick(final View view) {
 
                 if (tileView == null){
-                    Snackbar.make(view, "No map available.", Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, R.string.no_map_available, Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                     return;
                 }
 
                 Snackbar.make(tileView,
-                    "Searching for players...",
+                    R.string.searching_for_players,
                     Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
 
@@ -430,13 +431,13 @@ public class MapFragment extends Fragment {
                                 public void run() {
 
                                     if(players == null){
-                                        Snackbar.make(view, "Failed to retrieve player data.", Snackbar.LENGTH_LONG)
+                                        Snackbar.make(view, R.string.failed_to_retrieve_player_data, Snackbar.LENGTH_LONG)
                                                 .setAction("Action", null).show();
                                         return;
                                     }
 
                                     if(players.length == 0){
-                                        Snackbar.make(view, "No multiplayer data found.", Snackbar.LENGTH_LONG)
+                                        Snackbar.make(view, R.string.no_multiplayer_data_found, Snackbar.LENGTH_LONG)
                                                 .setAction("Action", null).show();
                                         return;
                                     }
@@ -454,9 +455,9 @@ public class MapFragment extends Fragment {
 
                                     //wrap layout in alert
                                     new AlertDialog.Builder(activity)
-                                            .setTitle("Go to player")
+                                            .setTitle(R.string.go_to_player)
                                             .setView(spinner)
-                                            .setPositiveButton("Go!", new DialogInterface.OnClickListener() {
+                                            .setPositiveButton(R.string.go_loud, new DialogInterface.OnClickListener() {
 
                                                 public void onClick(DialogInterface dialog, int whichButton) {
 
@@ -468,7 +469,7 @@ public class MapFragment extends Fragment {
                                                         DimensionVector3<Float> playerPos = getMultiPlayerPos(playerKey);
 
                                                         Snackbar.make(tileView,
-                                                                playerKey+" at: ("+playerPos.x+"; "+playerPos.z+").",
+                                                                String.format(Locale.ENGLISH, getString(R.string.player_at_xy), playerKey, playerPos.x, playerPos.z),
                                                                 Snackbar.LENGTH_LONG)
                                                                 .setAction("Action", null).show();
 
@@ -519,22 +520,22 @@ public class MapFragment extends Fragment {
 
                     //wrap layout in alert
                     new AlertDialog.Builder(activity)
-                        .setTitle("Go to coordinate")
+                        .setTitle(R.string.go_to_coordinate)
                         .setView(xzForm)
-                        .setPositiveButton("Go!", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.go_loud, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
 
                                     int inX, inZ;
                                     try{
                                         inX = Integer.parseInt(xInput.getText().toString());
                                     } catch (NullPointerException | NumberFormatException e){
-                                        Toast.makeText(activity,"Invalid X coordinate!",Toast.LENGTH_LONG).show();
+                                        Toast.makeText(activity, R.string.invalid_x_coordinate,Toast.LENGTH_LONG).show();
                                         return;
                                     }
                                     try{
                                         inZ = Integer.parseInt(zInput.getText().toString());
                                     } catch (NullPointerException | NumberFormatException e){
-                                        Toast.makeText(activity,"Invalid Z coordinate!",Toast.LENGTH_LONG).show();
+                                        Toast.makeText(activity, R.string.invalid_z_coordinate,Toast.LENGTH_LONG).show();
                                         return;
                                     }
 
@@ -763,7 +764,7 @@ public class MapFragment extends Fragment {
                                         moveMarker(localPlayerMarker,newX, newY, newZ, newDimension);
 
                                         Snackbar.make(tileView,
-                                                "Teleported the player to: "+newX+";"+newY+";"+newZ+" ["+newDimension.name+"] ("+marker.displayName+")",
+                                                activity.getString(R.string.teleported_player_to_xyz_dimension)+newX+";"+newY+";"+newZ+" ["+newDimension.name+"] ("+marker.displayName+")",
                                                 Snackbar.LENGTH_LONG)
                                                 .setAction("Action", null).show();
 
@@ -772,8 +773,7 @@ public class MapFragment extends Fragment {
                                 } catch (Exception e){
                                     Log.w(e.toString());
 
-                                    Snackbar.make(tileView,
-                                            "Failed to teleport player.",
+                                    Snackbar.make(tileView, R.string.failed_teleporting_player,
                                             Snackbar.LENGTH_LONG)
                                             .setAction("Action", null).show();
                                 }

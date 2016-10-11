@@ -224,7 +224,7 @@ public class EditorFragment extends Fragment {
                                 byteTag.setValue(Byte.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, "\"" + sValue + "\" is invalid!", Snackbar.LENGTH_LONG)
+                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             }
                         }
@@ -249,7 +249,7 @@ public class EditorFragment extends Fragment {
                                 shortTag.setValue(Short.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, "\"" + sValue + "\" is invalid!", Snackbar.LENGTH_LONG)
+                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             }
                         }
@@ -274,7 +274,7 @@ public class EditorFragment extends Fragment {
                                 intTag.setValue(Integer.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, "\"" + sValue + "\" is invalid!", Snackbar.LENGTH_LONG)
+                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             }
                         }
@@ -299,7 +299,7 @@ public class EditorFragment extends Fragment {
                                 longTag.setValue(Long.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, "\"" + sValue + "\" is invalid!", Snackbar.LENGTH_LONG)
+                                Snackbar.make(editText,  String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             }
                         }
@@ -324,7 +324,7 @@ public class EditorFragment extends Fragment {
                                 floatTag.setValue(Float.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, "\"" + sValue + "\" is invalid!", Snackbar.LENGTH_LONG)
+                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             }
                         }
@@ -349,7 +349,7 @@ public class EditorFragment extends Fragment {
                                 doubleTag.setValue(Double.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, "\"" + sValue + "\" is invalid!", Snackbar.LENGTH_LONG)
+                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             }
                         }
@@ -396,56 +396,54 @@ public class EditorFragment extends Fragment {
 
     public enum NBTEditOption {
 
-        CANCEL("Cancel"),
-        COPY("Copy"),
-        PASTE_OVERWRITE("Paste (overwrite)"),
-        PASTE_SUBTAG("Paste (as sub-tag)"),
-        DELETE("Delete"),
-        RENAME("Rename"),
-        ADD_SUBTAG("Add sub-tag");
+        CANCEL(R.string.edit_cancel),
+        COPY(R.string.edit_copy),
+        PASTE_OVERWRITE(R.string.edit_paste_overwrite),
+        PASTE_SUBTAG(R.string.edit_paste_sub_tag),
+        DELETE(R.string.edit_delete),
+        RENAME(R.string.edit_rename),
+        ADD_SUBTAG(R.string.edit_add_sub_tag);
 
-        public final String name;
+        public final int stringId;
 
-        NBTEditOption(String name){
-            this.name = name;
+        NBTEditOption(int stringId){
+            this.stringId = stringId;
         }
+    }
 
-        public static String[] options;
-
-        static {
-            NBTEditOption[] values = values();
-            int len = values.length;
-            options = new String[len];
-            for(int i = 0; i < len; i++){
-                options[i] = values[i].name;
-            }
+    public String[] getNBTEditOptions(){
+        NBTEditOption[] values = NBTEditOption.values();
+        int len = values.length;
+        String[] options = new String[len];
+        for(int i = 0; i < len; i++){
+            options[i] = getString(values[i].stringId);
         }
+        return options;
     }
 
     public enum RootNBTEditOption {
 
-        ADD_NBT_TAG("Add NBT tag"),
-        PASTE_SUB_TAG("Paste as sub-tag"),
-        REMOVE_ALL_TAGS("Remove all NBT tags");
+        ADD_NBT_TAG(R.string.edit_root_add),
+        PASTE_SUB_TAG(R.string.edit_root_paste_sub_tag),
+        REMOVE_ALL_TAGS(R.string.edit_root_remove_all);
 
-        public final String name;
+        public final int stringId;
 
-        RootNBTEditOption(String name){
-            this.name = name;
+        RootNBTEditOption(int stringId){
+            this.stringId = stringId;
         }
 
-        public static String[] options;
-
-        static {
-            RootNBTEditOption[] values = values();
-            int len = values.length;
-            options = new String[len];
-            for(int i = 0; i < len; i++){
-                options[i] = values[i].name;
-            }
-        }
     }
 
+    public String[] getRootNBTEditOptions(){
+        RootNBTEditOption[] values = RootNBTEditOption.values();
+        int len = values.length;
+        String[] options = new String[len];
+        for(int i = 0; i < len; i++){
+            options[i] = getString(values[i].stringId);
+        }
+        return options;
+    }
 
 
     public static Tag clipboard;
@@ -515,16 +513,16 @@ public class EditorFragment extends Fragment {
                 if(value instanceof EditableNBT){
 
                     if(!nbt.enableRootModifications){
-                        Toast.makeText(activity, "Cannot edit root NBT tag.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, R.string.cannot_edit_root_NBT_tag, Toast.LENGTH_LONG).show();
                         return true;
                     }
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-                    builder.setTitle("Root NBT options")
-                            .setItems(RootNBTEditOption.options, new DialogInterface.OnClickListener() {
+                    builder.setTitle(R.string.root_NBT_options)
+                            .setItems(getRootNBTEditOptions(), new DialogInterface.OnClickListener() {
 
-                                private void showMsg(String msg){
+                                private void showMsg(int msg){
                                     Toast.makeText(activity, msg, Toast.LENGTH_LONG).show();
                                 }
 
@@ -535,7 +533,7 @@ public class EditorFragment extends Fragment {
                                         switch (option){
                                             case ADD_NBT_TAG:{
                                                 final EditText nameText = new EditText(activity);
-                                                nameText.setHint("Tag name here...");
+                                                nameText.setHint(R.string.hint_tag_name_here);
 
                                                 //NBT tag type spinner
                                                 final Spinner spinner = new Spinner(activity);
@@ -558,11 +556,11 @@ public class EditorFragment extends Fragment {
 
                                                 //wrap layout in alert
                                                 AlertDialog.Builder alert = new AlertDialog.Builder(activity);
-                                                alert.setTitle("Create NBT tag");
+                                                alert.setTitle(R.string.create_nbt_tag);
                                                 alert.setView(linearLayout);
 
                                                 //alert can create a new tag
-                                                alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                                                alert.setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int whichButton) {
 
                                                         //new tag name
@@ -586,7 +584,7 @@ public class EditorFragment extends Fragment {
                                                 });
 
                                                 //or alert is cancelled
-                                                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                alert.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int whichButton) {
                                                         Log.d("NBT tag creation cancelled");
                                                     }
@@ -598,7 +596,7 @@ public class EditorFragment extends Fragment {
                                             }
                                             case PASTE_SUB_TAG: {
                                                 if(clipboard == null){
-                                                    showMsg("Clipboard is empty!");
+                                                    showMsg(R.string.clipboard_is_empty);
                                                     return;
                                                 }
 
@@ -613,10 +611,10 @@ public class EditorFragment extends Fragment {
 
                                                 //wrap layout in alert
                                                 AlertDialog.Builder alert = new AlertDialog.Builder(activity);
-                                                alert.setTitle("Do you really want to delete all NBT tags?");
+                                                alert.setTitle(R.string.confirm_delete_all_nbt_tags);
 
                                                 //alert can create a new tag
-                                                alert.setPositiveButton("DELETE!", new DialogInterface.OnClickListener() {
+                                                alert.setPositiveButton(R.string.delete_loud, new DialogInterface.OnClickListener() {
 
                                                     public void onClick(DialogInterface dialog, int whichButton) {
 
@@ -634,7 +632,7 @@ public class EditorFragment extends Fragment {
                                                 });
 
                                                 //or alert is cancelled
-                                                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                alert.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int whichButton) {
                                                         Log.d("NBT tag creation cancelled");
                                                     }
@@ -649,7 +647,7 @@ public class EditorFragment extends Fragment {
                                             }
                                         }
                                     } catch (Exception e){
-                                        showMsg("Error: failed to do NBT change.");
+                                        showMsg(R.string.failed_to_do_NBT_change);
                                     }
                                 }
 
@@ -664,10 +662,10 @@ public class EditorFragment extends Fragment {
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-                    builder.setTitle("NBT tag options")
-                            .setItems(NBTEditOption.options, new DialogInterface.OnClickListener() {
+                    builder.setTitle(R.string.nbt_tag_options)
+                            .setItems(getNBTEditOptions(), new DialogInterface.OnClickListener() {
 
-                                private void showMsg(String msg){
+                                private void showMsg(int msg){
                                     Toast.makeText(activity, msg, Toast.LENGTH_LONG).show();
                                 }
 
@@ -693,7 +691,7 @@ public class EditorFragment extends Fragment {
                                             }
                                             case PASTE_OVERWRITE: {
                                                 if(clipboard == null){
-                                                    showMsg("Clipboard is empty!");
+                                                    showMsg(R.string.clipboard_is_empty);
                                                     return;
                                                 }
 
@@ -717,13 +715,13 @@ public class EditorFragment extends Fragment {
                                                         case COMPOUND: {
                                                             content = ((CompoundTag) parent).getValue();
                                                             if(checkKeyCollision(clipboard.getName(), content)){
-                                                                showMsg("Error: clipboard-key already exists in the compound!");
+                                                                showMsg(R.string.clipboard_key_exists_in_compound);
                                                                 return;
                                                             }
                                                             break;
                                                         }
                                                         default: {
-                                                            showMsg("Error: cannot overwrite tag: unknown parent NBT type.");
+                                                            showMsg(R.string.error_cannot_overwrite_tag_unknow_parent_type);
                                                             return;
                                                         }
                                                     }
@@ -736,13 +734,13 @@ public class EditorFragment extends Fragment {
                                                         nbt.setModified();
                                                         return;
                                                     }
-                                                    else showMsg("Error: cannot overwrite NBT in an empty parent tag.");
+                                                    else showMsg(R.string.error_cannot_overwrite_in_empty_parent);
                                                     return;
                                                 }
                                             }
                                             case PASTE_SUBTAG: {
                                                 if(clipboard == null){
-                                                    showMsg("Clipboard is empty!");
+                                                    showMsg(R.string.clipboard_is_empty);
                                                     return;
                                                 }
 
@@ -755,13 +753,13 @@ public class EditorFragment extends Fragment {
                                                     case COMPOUND: {
                                                         content = ((CompoundTag) self).getValue();
                                                         if(checkKeyCollision(clipboard.getName(), content)){
-                                                            showMsg("Error: clipboard-key already exists in the compound!");
+                                                            showMsg(R.string.clipboard_key_exists_in_compound);
                                                             return;
                                                         }
                                                         break;
                                                     }
                                                     default: {
-                                                        showMsg("Error: cannot paste as sub-tag: unknown parent NBT type.");
+                                                        showMsg(R.string.error_cannot_paste_as_sub_unknown_parent_type);
                                                         return;
                                                     }
                                                 }
@@ -797,7 +795,7 @@ public class EditorFragment extends Fragment {
                                                         break;
                                                     }
                                                     default:{
-                                                        showMsg("Error: cannot overwrite tag: unknown parent NBT type.");
+                                                        showMsg(R.string.error_cannot_overwrite_tag_unknow_parent_type);
                                                         return;
                                                     }
                                                 }
@@ -806,19 +804,19 @@ public class EditorFragment extends Fragment {
                                                     tree.removeNode(node);
                                                     nbt.setModified();
                                                 }
-                                                else showMsg("Error: cannot remove NBT from empty list.");
+                                                else showMsg(R.string.error_cannot_remove_from_empty_list);
                                                 return;
                                             }
                                             case RENAME: {
                                                 final EditText edittext = new EditText(activity);
-                                                edittext.setHint("Tag name here...");
+                                                edittext.setHint(R.string.hint_tag_name_here);
 
                                                 AlertDialog.Builder alert = new AlertDialog.Builder(activity);
-                                                alert.setTitle("Rename NBT tag");
+                                                alert.setTitle(R.string.rename_nbt_tag);
 
                                                 alert.setView(edittext);
 
-                                                alert.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
+                                                alert.setPositiveButton(R.string.rename, new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int whichButton) {
                                                         Editable newNameEditable = edittext.getText();
                                                         String newName = (newNameEditable == null || newNameEditable.toString().equals("")) ? null : newNameEditable.toString();
@@ -826,7 +824,7 @@ public class EditorFragment extends Fragment {
                                                         if(parent != null
                                                                 && parent instanceof CompoundTag
                                                                 && checkKeyCollision(newName, ((CompoundTag) parent).getValue())){
-                                                            showMsg("Error: parent-NBT-tag already contains that key!");
+                                                            showMsg(R.string.error_parent_already_contains_child_with_same_key);
                                                             return;
                                                         }
 
@@ -840,7 +838,7 @@ public class EditorFragment extends Fragment {
                                                     }
                                                 });
 
-                                                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                alert.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int whichButton) {
                                                         Log.d("Cancelled rename NBT tag");
                                                     }
@@ -855,7 +853,7 @@ public class EditorFragment extends Fragment {
                                                     case LIST:
                                                     case COMPOUND:{
                                                         final EditText nameText = new EditText(activity);
-                                                        nameText.setHint("Tag name here...");
+                                                        nameText.setHint(R.string.hint_tag_name_here);
 
                                                         //NBT tag type spinner
                                                         final Spinner spinner = new Spinner(activity);
@@ -878,11 +876,11 @@ public class EditorFragment extends Fragment {
 
                                                         //wrap layout in alert
                                                         AlertDialog.Builder alert = new AlertDialog.Builder(activity);
-                                                        alert.setTitle("Create NBT tag");
+                                                        alert.setTitle(R.string.create_nbt_tag);
                                                         alert.setView(linearLayout);
 
                                                         //alert can create a new tag
-                                                        alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                                                        alert.setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
                                                             public void onClick(DialogInterface dialog, int whichButton) {
 
                                                                 //new tag name
@@ -900,7 +898,7 @@ public class EditorFragment extends Fragment {
                                                                     content = ((CompoundTag) self).getValue();
 
                                                                     if(checkKeyCollision(newName, content)){
-                                                                        showMsg("Error: that key already exists in the compound!");
+                                                                        showMsg(R.string.error_key_already_exists_in_compound);
                                                                         return;
                                                                     }
                                                                 }
@@ -927,7 +925,7 @@ public class EditorFragment extends Fragment {
                                                         });
 
                                                         //or alert is cancelled
-                                                        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                        alert.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                                                             public void onClick(DialogInterface dialog, int whichButton) {
                                                                 Log.d("NBT tag creation cancelled");
                                                             }
@@ -939,7 +937,7 @@ public class EditorFragment extends Fragment {
 
                                                     }
                                                     default:{
-                                                        showMsg("Error: sub-tags can only be added to compound tags and list tags.");
+                                                        showMsg(R.string.sub_tags_only_add_compound_list);
                                                         return;
                                                     }
                                                 }
@@ -950,7 +948,7 @@ public class EditorFragment extends Fragment {
 
                                         }
                                     } catch (Exception e) {
-                                        showMsg("Error: failed to do NBT change.");
+                                        showMsg(R.string.failed_to_do_NBT_change);
                                     }
 
                                 }
@@ -975,12 +973,12 @@ public class EditorFragment extends Fragment {
             @Override
             public void onClick(final View view) {
                 if(!nbt.isModified()){
-                    Snackbar.make(view, "No data has changed, nothing to save.", Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, R.string.no_data_changed_nothing_to_save, Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 } else {
                     new AlertDialog.Builder(activity)
-                            .setTitle("NBT editor")
-                            .setMessage("Do you really want to save your changes?")
+                            .setTitle(R.string.nbt_editor)
+                            .setMessage(R.string.confirm_nbt_editor_changes)
                             .setIcon(R.drawable.ic_action_save_b)
                             .setPositiveButton(android.R.string.yes,
                                     new DialogInterface.OnClickListener() {
@@ -1013,7 +1011,7 @@ public class EditorFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        getActivity().setTitle("NBT editor");
+        getActivity().setTitle(R.string.nbt_editor);
 
         Bundle bundle = new Bundle();
         bundle.putString("title", nbt.getRootTitle());
