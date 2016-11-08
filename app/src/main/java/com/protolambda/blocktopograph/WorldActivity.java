@@ -391,7 +391,9 @@ public class WorldActivity extends AppCompatActivity
                 msg.setPadding((int)(19*dpi), (int)(5*dpi), (int)(14*dpi), (int)(5*dpi));
                 msg.setMaxLines(20);
                 msg.setMovementMethod(LinkMovementMethod.getInstance());
-                msg.setText(Html.fromHtml(getResources().getString(R.string.app_changelog, BuildConfig.VERSION_NAME)));
+                String content = String.format(getResources().getString(R.string.app_changelog), BuildConfig.VERSION_NAME);
+                //noinspection deprecation
+                msg.setText(Html.fromHtml(content));
                 builder.setView(msg)
                         .setTitle(R.string.action_changelog)
                         .setCancelable(true)

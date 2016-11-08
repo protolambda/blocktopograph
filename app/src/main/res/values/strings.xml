@@ -1,4 +1,5 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <string name="app_name">Blocktopograph</string>
 
     <string name="brand_sub">By @protolambda</string>
@@ -20,19 +21,20 @@
 
     <string name="no_custom_markers_title">No custom markers!</string>
     <string name="no_custom_markers">There are no custom markers yet! \n
-        You can create one by long-tapping on the place on the map where you want a marker, then tap \"Create custom marker\".
-        Then choose a marker icon and a Y-coordinate. And then check if you can find it here!</string>
+        You can create one by long-tapping on the place on the map where you want a marker,
+            then tap \"Create custom marker\".
+        Then choose a marker icon and a Y-coordinate.
+        And then check if you can find it here!</string>
 
     <string name="app_about">
-            This app is created by <a href="http://twitter.com/protolambda">@protolambda</a>. \n
-            More information (including the roadmap, changelog and help-information) can be found at:
-            <a href="http://blocktopograph.protolambda.com">blocktopograph.protolambda.com</a>. \n
+        This app is created by <a href="http://twitter.com/protolambda">@protolambda</a>. \n
+        More information (including the roadmap, changelog and help-information) can be found at:
+        <a href="http://blocktopograph.protolambda.com">blocktopograph.protolambda.com</a>. \n
         \n
         Please make a backup of all your loved MCPE worlds in case of data-corruption!\n
         NOTE: Minecraft might not load a whole world because of a single corrupt chunk of NBT!\n
         \n
-            This app is built for MCPE 0.14.x.\n
-            This app is not yet fully tested for MCPE (beta) 0.15.x.\n
+            This app is built and tested for MCPE 0.16.x, 0.15.x, and 0.14.x\n
             Older MCPE versions are not supported.\n
         \n
         \n
@@ -46,22 +48,28 @@
         \n
         \n
         <i>Used libraries</i>\n
-            &#8226; <a href="https://github.com/Clans/FloatingActionButton">FloatingActionButton</a> \n
-            &#8226; <a href="https://github.com/protolambda/TileView">a Tileview fork</a> \n
-            &#8226; <a href="https://github.com/Mojang/leveldb-mcpe">leveldb-mcpe</a> \n
-            with <a href="https://github.com/protolambda/android-leveldb">a android-leveldb fork</a> \n
+        &#8226; <a href="https://github.com/Clans/FloatingActionButton">FloatingActionButton</a> \n
+        &#8226; <a href="https://github.com/protolambda/TileView">
+                    Tileview, fork by protolambda</a> \n
+        &#8226; <a href="https://github.com/Mojang/leveldb-mcpe">leveldb-mcpe</a> \n
+            with <a href="https://github.com/protolambda/android-leveldb">
+                    android-leveldb, fork by protolambda</a> \n
 
     </string>
 
-    <string name="app_help">The app documentation can be found at: <a href="http://blocktopograph.protolambda.com/help">blocktopograph.protolambda.com/help</a>.
+    <string name="app_help">The app documentation can be found at:
+        <a href="http://blocktopograph.protolambda.com/help">
+            blocktopograph.protolambda.com/help
+        </a>.
     </string>
 
-    <!-- I hate this, using CDATA to format the html, and than parse it to android-text, ;_; -->
-    <string name="app_changelog"><Data><![CDATA[
-        Version: %1$s \n\n
+    <string name="app_changelog" formatted="false">
+        Version: <xliff:g id="version" example="0.0.1">%1$s</xliff:g>
+        <![CDATA[<br/><br/>
         Full changelog can be found at:
-        <a href="http://blocktopograph.protolambda.com/changelog">blocktopograph.protolambda.com/changelog</a>.
-        ]]> </Data>
+        <a href="http://blocktopograph.protolambda.com/changelog">
+            blocktopograph.protolambda.com/changelog
+        </a>]]>
     </string>
 
 
@@ -85,9 +93,15 @@
     <string name="storage_path_here">Storage path here…</string>
     <string name="open_world_custom_path">Open world with custom path</string>
     <string name="open">Open</string>
-    <string name="report_path_and_previous_search">Your path: %s\n\nAlready searched for world folders in %s</string>
+    <string name="report_path_and_previous_search" formatted="false">
+        Your path: <xliff:g id="file_path"
+        example="/storage/emulated/0/games/com.mojang/minecraftWorlds/worldName">%1$s</xliff:g>\n
+        \n
+        Already searched for world folders in <xliff:g id="file_path"
+        example="/storage/emulated/0/games/com.mojang/minecraftWorlds/">%2$s</xliff:g></string>
     <string name="no_file_folder_found_at_path">No file/folder found at path!</string>
-    <string name="worldpath_is_not_directory">That path (optionally suffixed with /level.dat) is not a directory!</string>
+    <string name="worldpath_is_not_directory">
+        That path (optionally suffixed with /level.dat) is not a directory!</string>
     <string name="no_level_dat_found">No level.dat file found!</string>
     <string name="error_opening_world">An error occurred while opening the world.</string>
     <string name="ask_close_world">Do you want to close this world?</string>
@@ -95,12 +109,17 @@
     <string name="open_nbt_from_db">Open NBT from DB</string>
     <string name="invalid_keyname">Invalid key name.</string>
     <string name="cannot_find_db_entry_with_name">Cannot find db entry with that name!</string>
-    <string name="failed_to_read_x_from_db">Failed to read \"%s\" from world database.</string>
+    <string name="failed_to_read_x_from_db" formatted="false">
+        Failed to read \"<xliff:g id="some_db_key" example="very_long_DB_key">%1$s</xliff:g>\"
+            from world database.</string>
     <string name="no_multiplayer_data_found">No multiplayer data found.</string>
     <string name="select_player">Select player</string>
     <string name="open_nbt">Open NBT</string>
-    <string name="failed_read_player_from_db_with_key_x">Failed to open player entry in DB. key: %s</string>
-    <string name="error_cannot_open_world_close_and_try_again">The current Minecraft world could not be opened. Try restarting this app, and close the world in MCPE if it was open.</string>
+    <string name="failed_read_player_from_db_with_key_x">Failed to open player entry in DB. key:
+        <xliff:g id="player_db_key" example="player_123456790">%1$s</xliff:g></string>
+    <string name="error_cannot_open_world_close_and_try_again">
+        The current Minecraft world could not be opened.
+        Try restarting this app, and close the world in MCPE if it was open.</string>
     <string name="confirm_close_world">Do you want to close this world?</string>
     <string name="confirm_close_nbt_editor">Do you really want to close this NBT editor?</string>
     <string name="teleport_local_player">Teleport local player</string>
@@ -110,9 +129,14 @@
     <string name="entity_chunk_data">Entity chunk data</string>
     <string name="tile_entity_chunk_data">Tile-entity chunk data</string>
     <string name="nbt_chunk_data">NBT chunk data</string>
-    <string name="teleported_player_to_xyz_dim">Teleported the player to: %s;%s;%s [%s]</string>
+    <string name="teleported_player_to_xyz_dim" formatted="false">Teleported the player to:
+        (<xliff:g id="x_coordinate" example="123.45">%1$d</xliff:g>;
+        <xliff:g id="y_coordinate" example="42.122333">%2$d</xliff:g>;
+        <xliff:g id="z_coordinate" example="-123.987">%3$d</xliff:g>)
+        [<xliff:g id="dimension" example="Overworld">%4$s</xliff:g>].</string>
     <string name="failed_teleporting_player">Failed to teleport player.</string>
-    <string name="failed_to_find_or_edit_local_player_data">Failed to find/edit local player data.</string>
+    <string name="failed_to_find_or_edit_local_player_data">
+        Failed to find/edit local player data.</string>
     <string name="default_custom_marker_name">My custom marker</string>
     <string name="marker_invalid_name">Invalid marker name!</string>
     <string name="invalid_icon_name">Invalid icon name!</string>
@@ -120,19 +144,31 @@
     <string name="invalid_y_coordinate">Invalid marker Y coordinate!</string>
     <string name="invalid_z_coordinate">Invalid marker Z coordinate!</string>
     <string name="failed_to_create_marker">Error: failed to create marker.</string>
-    <string name="failed_to_load_x">Failed to load %s.</string>
+    <string name="failed_to_load_x" formatted="false">
+        Failed to load <xliff:g id="some_data" example="some data">%1$s</xliff:g>.
+    </string>
     <string name="nbt_editor">NBT editor</string>
-    <string name="data_does_not_exist_for_chunk_ask_if_create">This type of data does not yet exist for this chunk. It needs to exist first, do you want to create it?</string>
-    <string name="creating_and_saving_chunk_NBT_data">Creating and saving new NBT chunk data…</string>
-    <string name="created_and_saved_chunk_NBT_data">Created and saved new NBT chunk data!</string>
-    <string name="failed_to_create_or_save_chunk_NBT_data">Error: failed to create/save the new NBT chunk data.</string>
+    <string name="data_does_not_exist_for_chunk_ask_if_create">
+        This type of data does not yet exist for this chunk.
+        It needs to exist first, do you want to create it?</string>
+    <string name="creating_and_saving_chunk_NBT_data">
+        Creating and saving new NBT chunk data…</string>
+    <string name="created_and_saved_chunk_NBT_data">
+        Created and saved new NBT chunk data!</string>
+    <string name="failed_to_create_or_save_chunk_NBT_data">
+        Error: failed to create/save the new NBT chunk data.</string>
     <string name="full_date_format">dd/MM/yyyy hh:mm a</string>
-    <string name="error_could_not_open_world_details_lost_track_world">Error: could not open world details; lost track of world.</string>
+    <string name="error_could_not_open_world_details_lost_track_world">
+        Error: could not open world details; lost track of world.</string>
     <string name="error_could_not_open_world">Error: could not open world.</string>
     <string name="no_level_data_available">no level-data available</string>
-    <string name="details_xWorld_yLastTimePlayed">World name: %s\n Last time played: %s</string>
+    <string name="details_xWorld_yLastTimePlayed" formatted="false">
+        World name: <xliff:g id="world_name" example="My survival world">%1$s</xliff:g>\n
+        Last time played: <xliff:g id="last_time_played" example="20/1/2016 11:59 AM">%2$s</xliff:g>
+    </string>
     <string name="loading_world">Loading world…</string>
-    <string name="x_is_invalid">\"%s\" is invalid!</string>
+    <string name="x_is_invalid" formatted="false">
+        \"<xliff:g id="something_invalid" example="something">%1$s</xliff:g>\" is invalid!</string>
     <string name="edit_cancel">Cancel</string>
     <string name="edit_copy">Copy</string>
     <string name="edit_paste_overwrite">Paste (overwrite)</string>
@@ -153,23 +189,40 @@
     <string name="delete_loud">DELETE!</string>
     <string name="failed_to_do_NBT_change">Error: failed to do NBT change.</string>
     <string name="nbt_tag_options">NBT tag options</string>
-    <string name="clipboard_key_exists_in_compound">Error: clipboard-key already exists in the compound!</string>
-    <string name="error_cannot_overwrite_tag_unknow_parent_type">Error: cannot overwrite tag: unknown parent NBT type.</string>
-    <string name="error_cannot_overwrite_in_empty_parent">Error: cannot overwrite NBT in an empty parent tag.</string>
-    <string name="error_cannot_paste_as_sub_unknown_parent_type">Error: cannot paste as sub-tag: unknown parent NBT type.</string>
-    <string name="error_cannot_remove_from_empty_list">Error: cannot remove NBT from empty list.</string>
+    <string name="clipboard_key_exists_in_compound">
+        Error: clipboard-key already exists in the compound!</string>
+    <string name="error_cannot_overwrite_tag_unknow_parent_type">
+        Error: cannot overwrite tag: unknown parent NBT type.</string>
+    <string name="error_cannot_overwrite_in_empty_parent">
+        Error: cannot overwrite NBT in an empty parent tag.</string>
+    <string name="error_cannot_paste_as_sub_unknown_parent_type">
+        Error: cannot paste as sub-tag: unknown parent NBT type.</string>
+    <string name="error_cannot_remove_from_empty_list">
+        Error: cannot remove NBT from empty list.</string>
     <string name="rename_nbt_tag">Rename NBT tag</string>
     <string name="rename">Rename</string>
-    <string name="error_parent_already_contains_child_with_same_key">Error: parent-NBT-tag already contains that key!</string>
-    <string name="error_key_already_exists_in_compound">Error: that key already exists in the compound!</string>
-    <string name="sub_tags_only_add_compound_list">Error: sub-tags can only be added to compound tags and list tags.</string>
-    <string name="no_data_changed_nothing_to_save">No data has changed, nothing to save.</string>
-    <string name="confirm_nbt_editor_changes">Do you really want to save your changes?</string>
-    <string name="coordinates_xy_dimension">Player at: (%s; %s) [%s].</string>
+    <string name="error_parent_already_contains_child_with_same_key">
+        Error: parent-NBT-tag already contains that key!</string>
+    <string name="error_key_already_exists_in_compound">
+        Error: that key already exists in the compound!</string>
+    <string name="sub_tags_only_add_compound_list">
+        Error: sub-tags can only be added to compound tags and list tags.</string>
+    <string name="no_data_changed_nothing_to_save">
+        No data has changed, nothing to save.</string>
+    <string name="confirm_nbt_editor_changes">
+        Do you really want to save your changes?</string>
+    <string name="coordinates_xy_dimension" formatted="false">
+        Player at:
+        (<xliff:g id="x_coordinate" example="123.45">%1$d</xliff:g>;
+        <xliff:g id="y_coordinate" example="-123.987">%2$d</xliff:g>)
+        [<xliff:g id="dimension" example="Overworld">%3$s</xliff:g>].</string>
     <string name="failed_find_player">Failed to find player.</string>
     <string name="failed_find_spawn">Failed to find spawn.</string>
     <string name="go_to_a_marker_list">Go to a marker:</string>
-    <string name="player_at_xy">%s at: (%d; %d).</string>
+    <string name="player_at_xy" formatted="false">
+        <xliff:g id="player_name" example="Steve">%1$s</xliff:g> at:
+        (<xliff:g id="x_coordinate" example="123.45">%2$d</xliff:g>;
+        <xliff:g id="y_coordinate" example="-123.987">%3$d</xliff:g>).</string>
     <string name="no_map_available">No map available.</string>
     <string name="searching_for_players">Searching for players…</string>
     <string name="failed_to_retrieve_player_data">Failed to retrieve player data.</string>
