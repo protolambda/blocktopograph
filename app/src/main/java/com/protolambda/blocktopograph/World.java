@@ -2,7 +2,7 @@ package com.protolambda.blocktopograph;
 
 import com.protolambda.blocktopograph.chunk.ChunkData;
 import com.protolambda.blocktopograph.chunk.RegionDataType;
-import com.protolambda.blocktopograph.map.CustomMarkerManager;
+import com.protolambda.blocktopograph.map.MarkerManager;
 import com.protolambda.blocktopograph.map.Dimension;
 import com.protolambda.blocktopograph.nbt.convert.LevelDataConverter;
 import com.protolambda.blocktopograph.nbt.convert.NBTConstants;
@@ -27,7 +27,6 @@ public class World implements Serializable {
         return worldName.replaceAll("\u00A7.", "");
     }
 
-    //TODO move to separate file?
     public enum SpecialDBEntryType {
 
         //Who came up with the formatting for these NBT keys is CRAZY
@@ -105,14 +104,11 @@ public class World implements Serializable {
         this.level = level;
     }
 
-    public CustomMarkerManager markersManager;
+    private MarkerManager markersManager;
 
-    public CustomMarkerManager getMarkerManager() {
-        if(markersManager == null){
-            markersManager = new CustomMarkerManager(new File(this.worldFolder, "markers.txt"));
-        }
-
-        if(markersManager.markers == null) markersManager.load();
+    public MarkerManager getMarkerManager() {
+        if(markersManager == null)
+            markersManager = new MarkerManager(new File(this.worldFolder, "markers.txt"));
 
         return markersManager;
     }

@@ -23,7 +23,7 @@ public class ChunkManager {
     }
 
 
-    public long xzToKey(int x, int z){
+    public static long xzToKey(int x, int z){
         return (((long) x) << 32) | (((long) z) & 0xFFFFFFFFL);
     }
 

@@ -2,6 +2,7 @@ package com.protolambda.blocktopograph;
 
 import android.os.Bundle;
 
+import com.protolambda.blocktopograph.chunk.ChunkData;
 import com.protolambda.blocktopograph.map.Dimension;
 import com.protolambda.blocktopograph.map.marker.AbstractMarker;
 import com.protolambda.blocktopograph.map.renderer.MapType;
@@ -13,8 +14,6 @@ public interface WorldActivityInterface {
 
 
     World getWorld();
-
-    void onLongClick(double worldX, double worldZ);
 
     Dimension getDimension();
 
@@ -38,4 +37,5 @@ public interface WorldActivityInterface {
 
     void changeMapType(MapType mapType, Dimension dimension);
 
+    void openChunkNBTEditor(int chunkX, int chunkZ, ChunkData chunkData);
 }

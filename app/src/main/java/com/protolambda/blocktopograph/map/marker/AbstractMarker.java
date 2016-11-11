@@ -6,37 +6,23 @@ import android.widget.ImageView;
 
 import com.protolambda.blocktopograph.map.Dimension;
 
-/**
- * TODO docs
- *
- * Custom markers are user-configured
- * Non-custom markers are procedural
- *
- * TODO we should use generics to make a difference between custom and procedural markers...
- */
 public abstract class AbstractMarker {
 
-    public int x, y, z;
-    public Dimension dimension;
+    public final int x, y, z;
+    public final Dimension dimension;
     public final String iconName;
-    public String displayName;
+    public final String displayName;
 
-    public AbstractMarker(int x, int y, int z, Dimension dimension, String iconName, String displayName) {
+    public final boolean isCustom;
+
+    public AbstractMarker(int x, int y, int z, Dimension dimension, String iconName, String displayName, boolean isCustom) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.dimension = dimension;
         this.iconName = iconName;
         this.displayName = displayName;
-    }
-
-    public abstract MarkerType getMarkerType();
-
-    public void move(int newX, int newY, int newZ, Dimension dimension){
-        this.x = newX;
-        this.y = newY;
-        this.z = newZ;
-        this.dimension = dimension;
+        this.isCustom = isCustom;
     }
 
     public int getChunkX(){
@@ -58,4 +44,34 @@ public abstract class AbstractMarker {
 
     public abstract void loadIcon(ImageView iconView, boolean dark);
 
+    public abstract AbstractMarker copy(int x, int y, int z, Dimension dimension);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AbstractMarker that = (AbstractMarker) o;
+
+        return x == that.x
+            && y == that.y
+            && z == that.z
+            && dimension == that.dimension
+            && (iconName != null
+                ? iconName.equals(that.iconName) : that.iconName == null)
+            && (displayName != null
+                ? displayName.equals(that.displayName) : that.displayName == null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = x;
+        result = 31 * result + y;
+        result = 31 * result + z;
+        result = 31 * result + (dimension != null ? dimension.hashCode() : 0);
+        result = 31 * result + (iconName != null ? iconName.hashCode() : 0);
+        result = 31 * result + (displayName != null ? displayName.hashCode() : 0);
+        return result;
+    }
 }

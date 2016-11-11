@@ -78,8 +78,6 @@
     <string name="map_water_mark">Blocktopograph</string>
 
     <string name="create_marker_info">
-        Warning: this is a very experimental beta feature.\n
-        Markers can be removed/edited by editing the markers.txt in your world folder.\n
         Marker icons:\n
         &#8226; default_marker, blue_marker, green_marker, red_marker \n
         &#8226; Entity data-names (case sensitive) \n
@@ -124,15 +122,23 @@
     <string name="confirm_close_nbt_editor">Do you really want to close this NBT editor?</string>
     <string name="teleport_local_player">Teleport local player</string>
     <string name="create_custom_marker">Create custom marker</string>
+    <string name="remove_custom_marker">Remove marker</string>
     <string name="open_chunk_entity_nbt">Open chunk entity NBT</string>
     <string name="open_chunk_tile_entity_nbt">Open chunk tile-entity NBT</string>
     <string name="entity_chunk_data">Entity chunk data</string>
     <string name="tile_entity_chunk_data">Tile-entity chunk data</string>
     <string name="nbt_chunk_data">NBT chunk data</string>
+    <string name="marker_info" formatted="false">
+        <xliff:g id="marker_displayname" example="My awesome marker">%1$s</xliff:g>
+        ~ <xliff:g id="marker_dataname" example="blue_marker">%2$s</xliff:g>
+        (<xliff:g id="x_coordinate" example="123.45">%3$d</xliff:g>;
+        <xliff:g id="y_coordinate" example="42.122333">%4$d</xliff:g>;
+        <xliff:g id="z_coordinate" example="-123.987">%5$d</xliff:g>)
+        [<xliff:g id="dimension" example="Overworld">%6$s</xliff:g>].</string>
     <string name="teleported_player_to_xyz_dim" formatted="false">Teleported the player to:
-        (<xliff:g id="x_coordinate" example="123.45">%1$d</xliff:g>;
-        <xliff:g id="y_coordinate" example="42.122333">%2$d</xliff:g>;
-        <xliff:g id="z_coordinate" example="-123.987">%3$d</xliff:g>)
+        (<xliff:g id="x_coordinate" example="123.45">%1$.2f</xliff:g>;
+        <xliff:g id="y_coordinate" example="42.122333">%2$.2f</xliff:g>;
+        <xliff:g id="z_coordinate" example="-123.987">%3$.2f</xliff:g>)
         [<xliff:g id="dimension" example="Overworld">%4$s</xliff:g>].</string>
     <string name="failed_teleporting_player">Failed to teleport player.</string>
     <string name="failed_to_find_or_edit_local_player_data">
@@ -229,6 +235,6 @@
     <string name="go_to_player">Go to player</string>
     <string name="go_loud">Go!</string>
     <string name="go_to_coordinate">Go to coordinate</string>
-    <string name="teleported_player_to_xyz_dimension">"Teleported the player to: "</string>
-
+    <string name="teleported_player_to_xyz_dimension">Teleported the player to: </string>
+    <string name="marker_is_not_removable">This marker is not meant to be removed!</string>
 </resources>

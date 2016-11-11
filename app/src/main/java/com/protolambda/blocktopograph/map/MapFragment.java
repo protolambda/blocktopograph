@@ -1,17 +1,22 @@
 package com.protolambda.blocktopograph.map;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import com.protolambda.blocktopograph.Log;
+
+import android.text.Editable;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -29,10 +34,10 @@ import com.protolambda.blocktopograph.World;
 import com.protolambda.blocktopograph.WorldActivity;
 import com.protolambda.blocktopograph.WorldActivityInterface;
 import com.protolambda.blocktopograph.WorldData;
+import com.protolambda.blocktopograph.chunk.ChunkData;
+import com.protolambda.blocktopograph.chunk.RegionDataType;
 import com.protolambda.blocktopograph.map.marker.AbstractMarker;
 import com.protolambda.blocktopograph.map.marker.MarkerImageView;
-import com.protolambda.blocktopograph.map.marker.MarkerType;
-import com.protolambda.blocktopograph.map.marker.PlayerMarker;
 import com.protolambda.blocktopograph.map.marker.WorldDataMarker;
 import com.protolambda.blocktopograph.map.renderer.MapType;
 import com.protolambda.blocktopograph.nbt.EditableNBT;
@@ -45,18 +50,17 @@ import com.protolambda.blocktopograph.nbt.tags.ListTag;
 import com.protolambda.blocktopograph.nbt.tags.Tag;
 import com.protolambda.blocktopograph.util.ViewID;
 import com.protolambda.blocktopograph.util.math.DimensionVector3;
-import com.protolambda.blocktopograph.util.math.Vector3;
+import com.qozix.tileview.TileView;
 import com.qozix.tileview.markers.MarkerLayout;
-import com.qozix.tileview.tiles.TileCanvasViewGroup;
-import com.qozix.tileview.widgets.ZoomPanLayout;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Set;
 
 
 public class MapFragment extends Fragment {
@@ -65,14 +69,14 @@ public class MapFragment extends Fragment {
 
     private MCTileProvider minecraftTileProvider;
 
-    private MapFragmentTileView tileView;
+    private TileView tileView;
 
     //list of markers per chunk
-    public Map<Long, ArrayList<AbstractMarker>> proceduralMarkers = new HashMap<>();
-    public ArrayList<AbstractMarker> customMarkers = new ArrayList<>();
+    public Set<AbstractMarker> proceduralMarkers = new HashSet<>();
+    public Set<AbstractMarker> staticMarkers = new HashSet<>();
 
     public WorldDataMarker spawnMarker;
-    public PlayerMarker localPlayerMarker;
+    public WorldDataMarker localPlayerMarker;
 
 
 
@@ -197,12 +201,13 @@ public class MapFragment extends Fragment {
     public static class MarkerListAdapter extends ArrayAdapter<AbstractMarker> {
 
 
-        public MarkerListAdapter(Context context, ArrayList<AbstractMarker> objects) {
+        MarkerListAdapter(Context context, List<AbstractMarker> objects) {
             super(context, 0, objects);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
             RelativeLayout v = (RelativeLayout) convertView;
 
@@ -230,6 +235,29 @@ public class MapFragment extends Fragment {
             return v;
         }
 
+    }
+
+    public enum MarkerTapOption {
+
+        TELEPORT_LOCAL_PLAYER(R.string.teleport_local_player),
+        REMOVE_MARKER(R.string.remove_custom_marker);
+
+        public final int stringId;
+
+        MarkerTapOption(int id){
+            this.stringId = id;
+        }
+
+    }
+
+    public String[] getMarkerTapOptions(){
+        MarkerTapOption[] values = MarkerTapOption.values();
+        int len = values.length;
+        String[] options = new String[len];
+        for(int i = 0; i < len; i++){
+            options[i] = getString(values[i].stringId);
+        }
+        return options;
     }
 
     @Nullable
@@ -337,7 +365,7 @@ public class MapFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ArrayList<AbstractMarker> markers = worldProvider.getWorld().getMarkerManager().markers;
+                    Collection<AbstractMarker> markers = worldProvider.getWorld().getMarkerManager().getMarkers();
 
                     if(markers.isEmpty()){
                         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -357,7 +385,7 @@ public class MapFragment extends Fragment {
                         markerDialogBuilder.setIcon(R.drawable.ic_place);
                         markerDialogBuilder.setTitle(R.string.go_to_a_marker_list);
 
-                        final MarkerListAdapter arrayAdapter = new MarkerListAdapter(activity, markers);
+                        final MarkerListAdapter arrayAdapter = new MarkerListAdapter(activity, new ArrayList<>(markers));
 
                         markerDialogBuilder.setNegativeButton(android.R.string.cancel, null);
 
@@ -367,6 +395,7 @@ public class MapFragment extends Fragment {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         AbstractMarker m = arrayAdapter.getItem(which);
+                                        if(m == null) return;
 
                                         Snackbar.make(tileView,
                                                 String.format(Locale.ENGLISH, activity.getString(R.string.player_at_xy), m.displayName, m.x, m.z),
@@ -580,7 +609,28 @@ public class MapFragment extends Fragment {
         /*
         Create tile view
          */
-        this.tileView = new MapFragmentTileView(worldProvider, activity);
+        this.tileView = new TileView(activity) {
+
+            @Override
+            public void onLongPress(MotionEvent event) {
+
+                Dimension dimension = worldProvider.getDimension();
+
+                // 1 chunk per tile on scale 1.0
+                int pixelsPerBlockW_unscaled = MCTileProvider.TILESIZE / dimension.chunkW;
+                int pixelsPerBlockL_unscaled = MCTileProvider.TILESIZE / dimension.chunkL;
+
+                float pixelsPerBlockScaledW = pixelsPerBlockW_unscaled * this.getScale();
+                float pixelsPerBlockScaledL = pixelsPerBlockL_unscaled * this.getScale();
+
+
+                double worldX = ((( this.getScrollX() + event.getX()) / pixelsPerBlockScaledW) - MCTileProvider.HALF_WORLDSIZE) / dimension.dimensionScale;
+                double worldZ = ((( this.getScrollY() + event.getY()) / pixelsPerBlockScaledL) - MCTileProvider.HALF_WORLDSIZE) / dimension.dimensionScale;
+
+                MapFragment.this.onLongClick(worldX, worldZ);
+            }
+        };
+
         this.tileView.setId(ViewID.generateViewId());
 
         //set the map-type
@@ -605,7 +655,6 @@ public class MapFragment extends Fragment {
         Set the bitmap-provider of the tile view
          */
         this.tileView.setBitmapProvider(this.minecraftTileProvider);
-        this.tileView.setShouldRecycleBitmaps(false);
 
 
         /*
@@ -624,10 +673,6 @@ public class MapFragment extends Fragment {
                 1.0
         );
 
-
-        //TODO should a custom-detail-level-manager be used to optimize the tileview?
-        //see: https://github.com/moagrius/TileView/pull/297
-
         this.tileView.setSize(MCTileProvider.viewSizeW, MCTileProvider.viewSizeL);
 
         for(MapType mapType : MapType.values()){
@@ -639,26 +684,19 @@ public class MapFragment extends Fragment {
 
         }
 
-
         this.tileView.setScale(0.5f);
-
-
-        //TODO load player pos, center around that instead of origin
-        //center frame around origin
-        //TODO frameTo does not work!!! ???
-        //this.frameTo(0, 0);
-
-        //tileView.scrollTo(0.0, 0.0);
 
 
         boolean framedToPlayer = false;
 
+        //TODO multi-thread this
         try {
 
             DimensionVector3<Float> playerPos = getPlayerPos();
             float x = playerPos.x, y = playerPos.y, z = playerPos.z;
             Log.d("Placed player marker at: "+x+";"+y+";"+z+" ["+playerPos.dimension.name+"]");
-            localPlayerMarker = new PlayerMarker((int) x, (int) y, (int) z, playerPos.dimension, "~local_player");
+            localPlayerMarker = new WorldDataMarker((int) x, (int) y, (int) z, playerPos.dimension, "~local_player", WorldDataMarker.MarkerResource.PLAYER, false);
+            this.staticMarkers.add(localPlayerMarker);
             addMarker(localPlayerMarker);
 
             if(localPlayerMarker.dimension != worldProvider.getDimension()){
@@ -677,7 +715,8 @@ public class MapFragment extends Fragment {
         try {
             DimensionVector3<Integer> spawnPos = getSpawnPos();
 
-            spawnMarker = new WorldDataMarker(spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dimension, "Spawn", WorldDataMarker.MarkerResource.SPAWN);
+            spawnMarker = new WorldDataMarker(spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dimension, "Spawn", WorldDataMarker.MarkerResource.SPAWN, false);
+            this.staticMarkers.add(spawnMarker);
             addMarker(spawnMarker);
 
             if(!framedToPlayer){
@@ -716,68 +755,90 @@ public class MapFragment extends Fragment {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder
-                    .setMessage("Teleport to "+marker.x+";"+marker.y+";"+marker.z+" ["+marker.dimension.name+"] ("+marker.displayName+") ?")
-                        .setPositiveButton("Teleport!", new DialogInterface.OnClickListener() {
-                            @Override
+                        .setTitle(String.format(getString(R.string.marker_info), marker.displayName, marker.iconName, marker.x, marker.y, marker.z, marker.dimension))
+                        .setItems(getMarkerTapOptions(), new DialogInterface.OnClickListener() {
+                            @SuppressWarnings("RedundantCast")
+                            @SuppressLint("SetTextI18n")
                             public void onClick(DialogInterface dialog, int which) {
 
-                                try {
-                                    final EditableNBT playerEditable = worldProvider.getEditablePlayer();
-                                    if (playerEditable == null)
-                                        throw new Exception("Player is null");
+                                final MarkerTapOption chosen = MarkerTapOption.values()[which];
 
-                                    Iterator playerIter = playerEditable.getTags().iterator();
-                                    if (!playerIter.hasNext())
-                                        throw new Exception("Player DB entry is empty!");
+                                switch (chosen){
+                                    case TELEPORT_LOCAL_PLAYER: {
+                                        try {
+                                            final EditableNBT playerEditable = worldProvider.getEditablePlayer();
+                                            if (playerEditable == null)
+                                                throw new Exception("Player is null");
 
-                                    //db entry consists of one compound tag
-                                    final CompoundTag playerTag = (CompoundTag) playerIter.next();
+                                            Iterator playerIter = playerEditable.getTags().iterator();
+                                            if (!playerIter.hasNext())
+                                                throw new Exception("Player DB entry is empty!");
 
-                                    ListTag posVec = (ListTag) playerTag.getChildTagByKey("Pos");
+                                            //db entry consists of one compound tag
+                                            final CompoundTag playerTag = (CompoundTag) playerIter.next();
 
-                                    if (posVec == null) throw new Exception("No \"Pos\" specified");
+                                            ListTag posVec = (ListTag) playerTag.getChildTagByKey("Pos");
 
-                                    final List<Tag> playerPos = posVec.getValue();
-                                    if (playerPos == null)
-                                        throw new Exception("No \"Pos\" specified");
-                                    if (playerPos.size() != 3)
-                                        throw new Exception("\"Pos\" value is invalid. value: " + posVec.getValue().toString());
+                                            if (posVec == null) throw new Exception("No \"Pos\" specified");
 
-                                    IntTag dimensionId = (IntTag) playerTag.getChildTagByKey("DimensionId");
-                                    if(dimensionId == null || dimensionId.getValue() == null)
-                                        throw new Exception("No \"DimensionId\" specified");
+                                            final List<Tag> playerPos = posVec.getValue();
+                                            if (playerPos == null)
+                                                throw new Exception("No \"Pos\" specified");
+                                            if (playerPos.size() != 3)
+                                                throw new Exception("\"Pos\" value is invalid. value: " + posVec.getValue().toString());
 
-
-                                    int newX = marker.x;
-                                    int newY = marker.y;
-                                    int newZ = marker.z;
-                                    Dimension newDimension = marker.dimension;
-
-                                    ((FloatTag) playerPos.get(0)).setValue(((float) newX) + 0.5f);
-                                    ((FloatTag) playerPos.get(1)).setValue(((float) newY) + 0.5f);
-                                    ((FloatTag) playerPos.get(2)).setValue(((float) newZ) + 0.5f);
-                                    dimensionId.setValue(newDimension.id);
+                                            IntTag dimensionId = (IntTag) playerTag.getChildTagByKey("DimensionId");
+                                            if(dimensionId == null || dimensionId.getValue() == null)
+                                                throw new Exception("No \"DimensionId\" specified");
 
 
-                                    if(playerEditable.save()){
+                                            int newX = marker.x;
+                                            int newY = marker.y;
+                                            int newZ = marker.z;
+                                            Dimension newDimension = marker.dimension;
 
-                                        moveMarker(localPlayerMarker,newX, newY, newZ, newDimension);
+                                            ((FloatTag) playerPos.get(0)).setValue(((float) newX) + 0.5f);
+                                            ((FloatTag) playerPos.get(1)).setValue(((float) newY) + 0.5f);
+                                            ((FloatTag) playerPos.get(2)).setValue(((float) newZ) + 0.5f);
+                                            dimensionId.setValue(newDimension.id);
 
-                                        Snackbar.make(tileView,
-                                                activity.getString(R.string.teleported_player_to_xyz_dimension)+newX+";"+newY+";"+newZ+" ["+newDimension.name+"] ("+marker.displayName+")",
-                                                Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
 
-                                    } else throw new Exception("Failed saving player");
+                                            if(playerEditable.save()){
 
-                                } catch (Exception e){
-                                    Log.w(e.toString());
+                                                localPlayerMarker = (WorldDataMarker) moveMarker(localPlayerMarker,newX, newY, newZ, newDimension);
 
-                                    Snackbar.make(tileView, R.string.failed_teleporting_player,
-                                            Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
+                                                Snackbar.make(tileView,
+                                                        activity.getString(R.string.teleported_player_to_xyz_dimension)+newX+";"+newY+";"+newZ+" ["+newDimension.name+"] ("+marker.displayName+")",
+                                                        Snackbar.LENGTH_LONG)
+                                                        .setAction("Action", null).show();
+
+                                            } else throw new Exception("Failed saving player");
+
+                                        } catch (Exception e){
+                                            Log.w(e.toString());
+
+                                            Snackbar.make(tileView, R.string.failed_teleporting_player,
+                                                    Snackbar.LENGTH_LONG)
+                                                    .setAction("Action", null).show();
+                                        }
+                                        return;
+                                    }
+                                    case REMOVE_MARKER: {
+                                        if(marker.isCustom){
+                                            MapFragment.this.removeMarker(marker);
+                                            MarkerManager mng = MapFragment.this.worldProvider.getWorld().getMarkerManager();
+                                            mng.removeMarker(marker, true);
+
+                                            mng.save();
+
+                                        } else {
+                                            //only custom markers are meant to be removable
+                                            Snackbar.make(tileView, R.string.marker_is_not_removable,
+                                                    Snackbar.LENGTH_LONG)
+                                                    .setAction("Action", null).show();
+                                        }
+                                    }
                                 }
-
                             }
                         })
                     .setCancelable(true)
@@ -802,177 +863,153 @@ public class MapFragment extends Fragment {
 
 
 
-        /*
-        Listen for map movements, remove invisible chunks
-         */
-        this.tileView.addZoomPanListener(new ZoomPanLayout.ZoomPanListener() {
-            @Override
-            public void onPanBegin(int x, int y, Origination origin) {
-
-            }
-
-            @Override
-            public void onPanUpdate(int x, int y, Origination origin) {
-
-            }
-
-            @Override
-            public void onPanEnd(int x, int y, Origination origin) {
-
-                //disposes invisible chunks
-                //updateViewport();
-            }
-
-            @Override
-            public void onZoomBegin(float scale, Origination origin) {
-
-            }
-
-            @Override
-            public void onZoomUpdate(float scale, Origination origin) {
-
-            }
-
-            @Override
-            public void onZoomEnd(float scale, Origination origin) {
-
-            }
-        });
-
-
-        /*
-
-        TODO marker stuff:
-        - add more marker-icons/types
-        - player markers with name-tags
-        - remove/edit custom marker option
-        - view with list of filtered markers (filter on entity-type, tile-entity-type, custom-type, etc.)
-
-         */
-
-
-
-        reloadCustomMarkers();
-
-
         return rootView;
     }
-
-    /*
-    //TODO this may need to be multithreaded
-    public void updateViewport(){
-
-
-        float pixelsPerBlockScaled = MCTileProvider.pixelsPerBlock * tileView.getScale();
-        int blockX = Math.round( (tileView.getScrollX()) / pixelsPerBlockScaled ) - MCTileProvider.HALF_WORLDSIZE;
-        int blockZ = Math.round( (tileView.getScrollY()) / pixelsPerBlockScaled ) - MCTileProvider.HALF_WORLDSIZE;
-        int blockW = Math.round( (tileView.getWidth()) / pixelsPerBlockScaled );
-        int blockH = Math.round( (tileView.getHeight()) / pixelsPerBlockScaled );
-
-        //minimum: (0; 0)
-        int minChunkX = blockX / Chunk.WIDTH;
-        int minChunkZ = blockZ / Chunk.LENGTH;
-        int chunkW = blockW / Chunk.WIDTH;
-        int chunkH = blockH / Chunk.LENGTH;
-
-        //maximum: (width; height)
-        int maxChunkX = minChunkX + chunkW;
-        int maxChunkZ = minChunkZ + chunkH;
-
-        //add some more space to the bounds
-        minChunkX -= chunkW;
-        minChunkZ -= chunkH;
-        maxChunkX += chunkW;
-        maxChunkZ += chunkH;
-
-        ArrayList<Long> removeList = new ArrayList<>();
-        for(Map.Entry<Long, ArrayList<AbstractMarker>> mList : proceduralMarkers.entrySet()){
-            long key = mList.getKey();
-            int cX = (int) (key >> 32);
-            int cZ = (int) key;
-            if(cX <= minChunkX || cX > maxChunkX || cZ <= minChunkZ || cZ > maxChunkZ){
-                for(AbstractMarker m : mList.getValue()){
-                    if(m.view != null) tileView.removeMarker(m.view);
-                }
-                removeList.add(key);
-            }
-        }
-        for(long key : removeList){
-            proceduralMarkers.remove(key);
-        }
-
-
-
-    }*/
-
-    /*
-    public Marker addPermanentMarker(Marker.MarkerResource markerRes, int x, int z){
-        return (Marker) tileView.addMarker(new Marker(getActivity(), markerRes, x, z),
-                (double) x / (double) MCTileProvider.HALF_WORLDSIZE,
-                (double) z / (double) MCTileProvider.HALF_WORLDSIZE,
-                -0.5f, -0.5f);
-    }*/
 
     public void updateVisibilityForAllMarkers(){
         Dimension dimension = worldProvider.getDimension();
         Activity act = getActivity();
         if(act == null) return;
 
-        if(spawnMarker != null) {
-            if (spawnMarker.dimension == dimension)
-                spawnMarker.getView(act).setVisibility(View.VISIBLE);
-            else spawnMarker.getView(act).setVisibility(View.INVISIBLE);
+        for (AbstractMarker marker : proceduralMarkers) {
+                marker.getView(act).setVisibility(
+                        marker.dimension == dimension ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+    /**
+     * Creates a new marker (looking exactly the same as the old one) on the new position,
+     *  while removing the old marker.
+     * @param marker Marker to be recreated
+     * @param x new pos X
+     * @param y new pos Y
+     * @param z new pos Z
+     * @param dimension new pos Dimension
+     * @return the newly created marker, which should replace the old one.
+     */
+    public AbstractMarker moveMarker(AbstractMarker marker, int x, int y, int z, Dimension dimension){
+        AbstractMarker newMarker = marker.copy(x, y, z, dimension);
+        if(staticMarkers.remove(marker)) staticMarkers.add(newMarker);
+        this.removeMarker(marker);
+        this.addMarker(newMarker);
+
+        if(marker.isCustom){
+            MarkerManager mng = this.worldProvider.getWorld().getMarkerManager();
+            mng.removeMarker(marker, true);
+            mng.addMarker(newMarker, true);
         }
 
-        if(localPlayerMarker != null) {
-            if (localPlayerMarker.dimension == dimension)
-                localPlayerMarker.getView(act).setVisibility(View.VISIBLE);
-            else localPlayerMarker.getView(act).setVisibility(View.INVISIBLE);
-        }
+        return newMarker;
+    }
 
-        for(AbstractMarker marker : customMarkers){
-            if(marker.dimension == dimension) marker.getView(act).setVisibility(View.VISIBLE);
-            else marker.getView(act).setVisibility(View.INVISIBLE);
-        }
+    private final static int MARKER_INTERVAL_CHECK = 50;
+    private int proceduralMarkersInterval = 0;
+    private AsyncTask shrinkProceduralMarkersTask;
 
-        for (ArrayList<AbstractMarker> markerChunk : proceduralMarkers.values()) {
-            if(markerChunk == null) continue;
-            for (AbstractMarker marker : markerChunk) {
-                if(marker == null) continue;
-                marker.getView(act).setVisibility(marker.dimension == dimension ? View.VISIBLE : View.INVISIBLE);
+
+    /**
+     * Calculates viewport of tileview, expressed in blocks.
+     * @param marginX horizontal viewport-margin, in pixels
+     * @param marginZ vertical viewport-margin, in pixels
+     * @return minimum_X, maximum_X, minimum_Z, maximum_Z, dimension. (min and max are expressed in blocks!)
+     */
+    public Object[] calculateViewPort(int marginX, int marginZ){
+
+        Dimension dimension = this.worldProvider.getDimension();
+
+        // 1 chunk per tile on scale 1.0
+        int pixelsPerBlockW_unscaled = MCTileProvider.TILESIZE / dimension.chunkW;
+        int pixelsPerBlockL_unscaled = MCTileProvider.TILESIZE / dimension.chunkL;
+
+        float scale = tileView.getScale();
+
+        //scale the amount of pixels, less pixels per block if zoomed out
+        int pixelsPerBlockW = Math.round(pixelsPerBlockW_unscaled * scale);
+        int pixelsPerBlockL = Math.round(pixelsPerBlockL_unscaled * scale);
+
+        int blockX = Math.round( (tileView.getScrollX() - marginX) / pixelsPerBlockW ) - MCTileProvider.HALF_WORLDSIZE;
+        int blockZ = Math.round( (tileView.getScrollY() - marginZ) / pixelsPerBlockL ) - MCTileProvider.HALF_WORLDSIZE;
+        int blockW = Math.round( (tileView.getWidth() + marginX + marginX) / pixelsPerBlockW );
+        int blockH = Math.round( (tileView.getHeight() + marginZ + marginZ) / pixelsPerBlockL );
+
+        return new Object[]{ blockX, blockX + blockW, blockZ, blockH, dimension };
+    }
+
+    public AsyncTask retainViewPortMarkers(final Runnable callback){
+
+        DisplayMetrics displayMetrics = this.getActivity().getResources().getDisplayMetrics();
+        return new AsyncTask<Object, AbstractMarker, Void>(){
+            @Override
+            protected Void doInBackground(Object... params) {
+                int minX = (int) params[0],
+                        maxX = (int) params[1],
+                        minY = (int) params[2],
+                        maxY = (int) params[3];
+                Dimension reqDim = (Dimension) params[4];
+
+                for (AbstractMarker p : MapFragment.this.proceduralMarkers){
+
+                    // do not remove static markers
+                    if(MapFragment.this.staticMarkers.contains(p)) continue;
+
+                    if(p.x < minX || p.x > maxX || p.y < minY || p.y > maxY || p.dimension != reqDim){
+                        this.publishProgress(p);
+                    }
+                }
+                return null;
             }
-        }
+
+            @Override
+            protected void onProgressUpdate(final AbstractMarker... values) {
+                for(AbstractMarker v : values) {
+                    MapFragment.this.removeMarker(v);
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                callback.run();
+            }
+
+        }.execute(this.calculateViewPort(
+                displayMetrics.widthPixels / 2,
+                displayMetrics.heightPixels / 2)
+        );
     }
 
-    public void moveMarker(AbstractMarker marker, int x, int y, int z, Dimension dimension){
-        marker.move(x, y, z, dimension);
-        if(marker.view != null){
-            tileView.moveMarker(marker.view,
-                    dimension.dimensionScale * (double) x / (double) MCTileProvider.HALF_WORLDSIZE,
-                    dimension.dimensionScale * (double) z / (double) MCTileProvider.HALF_WORLDSIZE);
-            if(dimension == worldProvider.getDimension()) marker.view.setVisibility(View.VISIBLE);
-            else marker.view.setVisibility(View.INVISIBLE);
-        }
+    /**
+     * Important: this method should be run from the UI thread.
+     * @param marker The marker to remove from the tile view.
+     */
+    public void removeMarker(AbstractMarker marker){
+        staticMarkers.remove(marker);
+        proceduralMarkers.remove(marker);
+        if(marker.view != null) tileView.removeMarker(marker.view);
     }
 
+    /**
+     * Important: this method should be run from the UI thread.
+     * @param marker The marker to add to the tile view.
+     */
     public void addMarker(AbstractMarker marker){
 
-        MarkerType markerType = marker.getMarkerType();
-        if(markerType.procedural) {
-            long key = (((long) marker.getChunkX()) << 32) | (((long) marker.getChunkZ()) & 0xFFFFFFFFL );
-            ArrayList<AbstractMarker> mList = proceduralMarkers.get(key);
-            if (mList == null) {
-                mList = new ArrayList<>();
-                proceduralMarkers.put(key, mList);
-            }
-            for (AbstractMarker b : mList) {
-                //no markers on each other
-                if (marker.x == b.x && marker.z == b.z && marker.dimension == b.dimension) return;
-            }
-            mList.add(marker);
-        } else if(marker.getMarkerType() == MarkerType.CUSTOM){
-            if(!customMarkers.contains(marker)) customMarkers.add(marker);
+        if(proceduralMarkers.contains(marker)) return;
+
+        if(shrinkProceduralMarkersTask == null
+                && ++proceduralMarkersInterval == MARKER_INTERVAL_CHECK){
+            //shrink set of markers to viewport every so often
+            shrinkProceduralMarkersTask = retainViewPortMarkers(new Runnable() {
+                @Override
+                public void run() {
+                    //reset this to start accepting viewport update requests again.
+                    shrinkProceduralMarkersTask = null;
+                }
+            });
         }
+        proceduralMarkersInterval %= MARKER_INTERVAL_CHECK;
+
+        proceduralMarkers.add(marker);
+
 
         Activity act = getActivity();
         if (act == null) return;
@@ -981,33 +1018,332 @@ public class MapFragment extends Fragment {
         markerView.setVisibility(
                 marker.dimension == worldProvider.getDimension() ? View.VISIBLE : View.INVISIBLE);
 
+        if(tileView.getMarkerLayout().indexOfChild(markerView) >= 0){
+            tileView.getMarkerLayout().removeMarker(markerView);
+        }
+
         tileView.addMarker(markerView,
                 marker.dimension.dimensionScale * (double) marker.x / (double) MCTileProvider.HALF_WORLDSIZE,
                 marker.dimension.dimensionScale * (double) marker.z / (double) MCTileProvider.HALF_WORLDSIZE,
                 -0.5f, -0.5f);
     }
 
-    public void reloadCustomMarkers(){
-        for(AbstractMarker marker : customMarkers){
-            if(marker.view != null) tileView.removeMarker(marker.view);
-        }
-        customMarkers.clear();
-
-        //Lets assume that this doesn't load extreme amounts of markers, it won't cause lag
-        CustomMarkerManager markersManager = worldProvider.getWorld().getMarkerManager();
-        markersManager.load();
-
-        for(AbstractMarker m : markersManager.getMarkers()){
-            this.addMarker(m);
-        }
-
-
-    }
-
     public void toggleMarkers(){
         int visibility = tileView.getMarkerLayout().getVisibility();
         tileView.getMarkerLayout().setVisibility( visibility == View.VISIBLE ? View.GONE : View.VISIBLE);
     }
+
+
+    public enum LongClickOption {
+
+        TELEPORT_LOCAL_PLAYER(R.string.teleport_local_player, null),
+        CREATE_MARKER(R.string.create_custom_marker, null),
+        //TODO TELEPORT_MULTI_PLAYER("Teleport other player", null),
+        ENTITY(R.string.open_chunk_entity_nbt, RegionDataType.ENTITY),
+        TILE_ENTITY(R.string.open_chunk_tile_entity_nbt, RegionDataType.TILE_ENTITY);
+
+        public final int stringId;
+        public final RegionDataType dataType;
+
+        LongClickOption(int id, RegionDataType dataType){
+            this.stringId = id;
+            this.dataType = dataType;
+        }
+
+    }
+
+    public String[] getLongClickOptions(){
+        LongClickOption[] values = LongClickOption.values();
+        int len = values.length;
+        String[] options = new String[len];
+        for(int i = 0; i < len; i++){
+            options[i] = getString(values[i].stringId);
+        }
+        return options;
+    }
+
+
+    public void onLongClick(final double worldX, final double worldZ){
+
+
+        final Activity activity = MapFragment.this.getActivity();
+
+
+        final Dimension dim = this.worldProvider.getDimension();
+
+        double chunkX = worldX / dim.chunkW;
+        double chunkZ = worldZ / dim.chunkL;
+
+        //negative doubles are rounded up when casting to int; floor them
+        final int chunkXint = chunkX < 0 ? (((int) chunkX) - 1) : ((int) chunkX);
+        final int chunkZint = chunkZ < 0 ? (((int) chunkZ) - 1) : ((int) chunkZ);
+
+
+
+        final View container = activity.findViewById(R.id.world_content);
+        if(container == null){
+            Log.w("CANNOT FIND MAIN CONTAINER, WTF");
+            return;
+        }
+
+        //TODO not translation-friendly
+        new AlertDialog.Builder(activity)
+                .setTitle(String.format(Locale.ENGLISH, "Pos: %.2f;%.2f Chunk: %d;%d Dimension: %s", worldX, worldZ, chunkXint, chunkZint, dim.name))
+                .setItems(getLongClickOptions(), new DialogInterface.OnClickListener() {
+                    @SuppressLint("SetTextI18n")
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        final LongClickOption chosen = LongClickOption.values()[which];
+
+
+                        switch (chosen){
+                            case TELEPORT_LOCAL_PLAYER:{
+                                try {
+
+                                    final EditableNBT playerEditable = MapFragment.this.worldProvider.getEditablePlayer();
+                                    if(playerEditable == null) throw new Exception("Player is null");
+
+                                    Iterator playerIter = playerEditable.getTags().iterator();
+                                    if(!playerIter.hasNext()) throw new Exception("Player DB entry is empty!");
+
+                                    //db entry consists of one compound tag
+                                    final CompoundTag playerTag = (CompoundTag) playerIter.next();
+
+                                    ListTag posVec = (ListTag) playerTag.getChildTagByKey("Pos");
+
+                                    if (posVec == null) throw new Exception("No \"Pos\" specified");
+
+                                    final List<Tag> playerPos = posVec.getValue();
+                                    if(playerPos == null)
+                                        throw new Exception("No \"Pos\" specified");
+                                    if (playerPos.size() != 3)
+                                        throw new Exception("\"Pos\" value is invalid. value: " + posVec.getValue().toString());
+
+                                    final IntTag dimensionId = (IntTag) playerTag.getChildTagByKey("DimensionId");
+                                    if(dimensionId == null || dimensionId.getValue() == null)
+                                        throw new Exception("No \"DimensionId\" specified");
+
+
+                                    float playerY = (float) playerPos.get(1).getValue();
+
+
+                                    View yForm = LayoutInflater.from(activity).inflate(R.layout.y_coord_form, null);
+                                    final EditText yInput = (EditText) yForm.findViewById(R.id.y_input);
+                                    yInput.setText(String.valueOf(playerY));
+
+                                    final float newX = (float) worldX;
+                                    final float newZ = (float) worldZ;
+
+                                    new AlertDialog.Builder(activity)
+                                            .setTitle(chosen.stringId)
+                                            .setView(yForm)
+                                            .setPositiveButton("Teleport!", new DialogInterface.OnClickListener() {
+                                                @SuppressWarnings("RedundantCast")
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+
+                                                    float newY;
+                                                    Editable value = yInput.getText();
+                                                    if(value == null) newY = 64f;
+                                                    else {
+                                                        try {
+                                                            newY = (float) Float.parseFloat(value.toString());//removes excessive precision
+                                                        } catch (Exception e){
+                                                            newY = 64f;
+                                                        }
+                                                    }
+
+                                                    ((FloatTag) playerPos.get(0)).setValue(newX);
+                                                    ((FloatTag) playerPos.get(1)).setValue(newY);
+                                                    ((FloatTag) playerPos.get(2)).setValue(newZ);
+                                                    dimensionId.setValue(dim.id);
+
+                                                    if(playerEditable.save()){
+
+                                                        MapFragment.this.localPlayerMarker = (WorldDataMarker) MapFragment.this.moveMarker(
+                                                                MapFragment.this.localPlayerMarker,
+                                                                    (int) newX, (int) newY, (int) newZ, dim);
+
+                                                        Snackbar.make(container,
+                                                                String.format(getString(R.string.teleported_player_to_xyz_dim), newX, newY, newZ, dim.name),
+                                                                Snackbar.LENGTH_LONG)
+                                                                .setAction("Action", null).show();
+                                                    } else {
+                                                        Snackbar.make(container,
+                                                                R.string.failed_teleporting_player,
+                                                                Snackbar.LENGTH_LONG)
+                                                                .setAction("Action", null).show();
+                                                    }
+                                                }
+                                            })
+                                            .setCancelable(true)
+                                            .setNegativeButton(android.R.string.cancel, null)
+                                            .show();
+                                    return;
+
+                                } catch (Exception e){
+                                    e.printStackTrace();
+                                    Snackbar.make(container, R.string.failed_to_find_or_edit_local_player_data,
+                                            Snackbar.LENGTH_LONG)
+                                            .setAction("Action", null).show();
+                                    return;
+                                }
+                            }
+                            case CREATE_MARKER:{
+
+                                View createMarkerForm = LayoutInflater.from(activity).inflate(R.layout.create_marker_form, null);
+
+                                final EditText markerNameInput = (EditText) createMarkerForm.findViewById(R.id.marker_displayname_input);
+                                markerNameInput.setText(R.string.default_custom_marker_name);
+                                final EditText markerIconNameInput = (EditText) createMarkerForm.findViewById(R.id.marker_iconname_input);
+                                markerIconNameInput.setText("blue_marker");
+                                final EditText xInput = (EditText) createMarkerForm.findViewById(R.id.x_input);
+                                xInput.setText(String.valueOf((int) worldX));
+                                final EditText yInput = (EditText) createMarkerForm.findViewById(R.id.y_input);
+                                yInput.setText(String.valueOf(64));
+                                final EditText zInput = (EditText) createMarkerForm.findViewById(R.id.z_input);
+                                zInput.setText(String.valueOf((int) worldZ));
+
+
+                                new AlertDialog.Builder(activity)
+                                        .setTitle(chosen.stringId)
+                                        .setView(createMarkerForm)
+                                        .setPositiveButton("Create marker", new DialogInterface.OnClickListener() {
+
+                                            public void failParseSnackbarReport(int msg){
+                                                Snackbar.make(container, msg,
+                                                        Snackbar.LENGTH_LONG)
+                                                        .setAction("Action", null).show();
+                                            }
+
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+
+                                                try {
+                                                    String displayName = markerNameInput.getText().toString();
+                                                    if (displayName.equals("") || displayName.contains("\"")) {
+                                                        failParseSnackbarReport(R.string.marker_invalid_name);
+                                                        return;
+                                                    }
+                                                    String iconName = markerIconNameInput.getText().toString();
+                                                    if (iconName.equals("") || iconName.contains("\"")) {
+                                                        failParseSnackbarReport(R.string.invalid_icon_name);
+                                                        return;
+                                                    }
+
+                                                    int xM, yM, zM;
+
+                                                    String xStr = xInput.getText().toString();
+                                                    try {
+                                                        xM = Integer.parseInt(xStr);
+                                                    } catch (NumberFormatException e) {
+                                                        failParseSnackbarReport(R.string.invalid_x_coordinate);
+                                                        return;
+                                                    }
+                                                    String yStr = yInput.getText().toString();
+                                                    try {
+                                                        yM = Integer.parseInt(yStr);
+                                                    } catch (NumberFormatException e) {
+                                                        failParseSnackbarReport(R.string.invalid_y_coordinate);
+                                                        return;
+                                                    }
+
+                                                    String zStr = zInput.getText().toString();
+                                                    try {
+                                                        zM = Integer.parseInt(zStr);
+                                                    } catch (NumberFormatException e) {
+                                                        failParseSnackbarReport(R.string.invalid_z_coordinate);
+                                                        return;
+                                                    }
+
+                                                    AbstractMarker marker = MarkerManager.markerFromData(displayName, iconName, xM, yM, zM, dim);
+                                                    MarkerManager mng = MapFragment.this.worldProvider.getWorld().getMarkerManager();
+                                                    mng.addMarker(marker, true);
+
+                                                    MapFragment.this.addMarker(marker);
+
+                                                    mng.save();
+
+                                                } catch (Exception e){
+                                                    e.printStackTrace();
+                                                    failParseSnackbarReport(R.string.failed_to_create_marker);
+                                                }
+                                            }
+                                        })
+                                        .setCancelable(true)
+                                        .setNegativeButton(android.R.string.cancel, null)
+                                        .show();
+
+
+
+
+
+                                return;
+                            }
+                            /* TODO multi player teleporting
+                            case TELEPORT_MULTI_PLAYER:{
+
+                                break;
+                            }*/
+                            case ENTITY:
+                            case TILE_ENTITY:{
+
+                                final World world = MapFragment.this.worldProvider.getWorld();
+                                ChunkData chunkData;
+                                try {
+                                    chunkData = world.loadChunkData(chunkXint, chunkZint, chosen.dataType, dim);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Snackbar.make(container, String.format(getString(R.string.failed_to_load_x), getString(chosen.stringId)),
+                                            Snackbar.LENGTH_LONG)
+                                            .setAction("Action", null).show();
+                                    return;
+                                }
+
+                                //ask the user if he/she wants to create the data, if loading got nothing
+                                if (chunkData == null) {
+
+                                    new AlertDialog.Builder(activity)
+                                            .setTitle(R.string.nbt_editor)
+                                            .setMessage(R.string.data_does_not_exist_for_chunk_ask_if_create)
+                                            .setIcon(R.drawable.ic_action_save_b)
+                                            .setPositiveButton(android.R.string.yes,
+                                                    new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                                            Snackbar.make(container, R.string.creating_and_saving_chunk_NBT_data, Snackbar.LENGTH_LONG)
+                                                                    .setAction("Action", null).show();
+                                                            ChunkData newChunkData = world.createEmptyChunkData(chunkXint, chunkZint, chosen.dataType, dim);
+                                                            if (newChunkData != null) {
+                                                                Snackbar.make(container, R.string.created_and_saved_chunk_NBT_data, Snackbar.LENGTH_LONG)
+                                                                        .setAction("Action", null).show();
+                                                                MapFragment.this.worldProvider.openChunkNBTEditor(chunkXint, chunkZint, newChunkData);
+                                                            } else {
+                                                                Snackbar.make(container, R.string.failed_to_create_or_save_chunk_NBT_data, Snackbar.LENGTH_LONG)
+                                                                        .setAction("Action", null).show();
+                                                            }
+                                                        }
+                                                    })
+                                            .setNegativeButton(android.R.string.no, null)
+                                            .show();
+
+                                } else {
+
+                                    //just open the editor if the data is there for us to edit it
+                                    MapFragment.this.worldProvider.openChunkNBTEditor(chunkXint, chunkZint, chunkData);
+                                }
+                            }
+                        }
+
+
+                    }
+                })
+                .setCancelable(true)
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+
+    }
+
+
 
     @Override
     public void onDestroy() {
@@ -1021,27 +1357,13 @@ public class MapFragment extends Fragment {
     }
 
     public void resetTileView(){
-
         if(this.tileView != null){
             worldProvider.logFirebaseEvent(WorldActivity.CustomFirebaseEvent.MAPFRAGMENT_RESET);
 
             updateVisibilityForAllMarkers();
 
             tileView.getDetailLevelManager().setLevelType(worldProvider.getMapType());
-/*
-            LEGACY WAY of resetting tileview, using a different method now;
-             parallel detail-levels work very well.
-                See the TileView fork by @protolambda
-
-            TileCanvasViewGroup tileCanvasViewGroup = this.tileView.getTileCanvasViewGroup();
-            this.tileView.getDetailLevelManager().getCurrentDetailLevel().invalidate();
-            tileCanvasViewGroup.clear();
-            //TODO tileCanvasViewGroup.clearAlreadyRendered();
-            tileCanvasViewGroup.requestRender();
-            tileView.resume();
-            */
         }
-
     }
 
 

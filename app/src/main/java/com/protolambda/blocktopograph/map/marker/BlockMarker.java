@@ -12,14 +12,9 @@ public class BlockMarker extends AbstractMarker {
 
     public final Block block;
 
-    public BlockMarker(int x, int y, int z, Dimension dimension, String displayName, Block block) {
-        super(x, y, z, dimension, block.dataName, displayName);
+    public BlockMarker(int x, int y, int z, Dimension dimension, String displayName, Block block, boolean isCustom) {
+        super(x, y, z, dimension, block.dataName, displayName, isCustom);
         this.block = block;
-    }
-
-    @Override
-    public MarkerType getMarkerType() {
-        return MarkerType.BLOCK;
     }
 
     @Override
@@ -27,5 +22,8 @@ public class BlockMarker extends AbstractMarker {
         iconView.setImageBitmap(block.bitmap);
     }
 
-
+    @Override
+    public BlockMarker copy(int x, int y, int z, Dimension dimension) {
+        return new BlockMarker(x, y, z, dimension, this.displayName, this.block, this.isCustom);
+    }
 }

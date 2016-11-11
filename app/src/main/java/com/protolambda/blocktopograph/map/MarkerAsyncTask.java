@@ -16,16 +16,18 @@ import com.protolambda.blocktopograph.nbt.tags.ListTag;
 import com.protolambda.blocktopograph.nbt.tags.StringTag;
 import com.protolambda.blocktopograph.nbt.tags.Tag;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Load the NBT of the chunks and output the markers, async with both map-rendering and UI
  */
 public class MarkerAsyncTask extends AsyncTask<Void, AbstractMarker, Void> {
 
-    WorldActivityInterface worldProvider;
+    private WorldActivityInterface worldProvider;
 
-    int minChunkX, minChunkZ, maxChunkX, maxChunkZ;
+    private int minChunkX, minChunkZ, maxChunkX, maxChunkZ;
 
 
     public MarkerAsyncTask(WorldActivityInterface worldProvider, int minChunkX, int minChunkZ, int maxChunkX, int maxChunkZ){
@@ -45,6 +47,7 @@ public class MarkerAsyncTask extends AsyncTask<Void, AbstractMarker, Void> {
             for(cX = minChunkX; cX < maxChunkX; cX++){
                 loadEntityMarkers(cX, cZ);
                 loadTileEntityMarkers(cX, cZ);
+                loadCustomMarkers(cX, cZ);
             }
         }
 
@@ -67,7 +70,7 @@ public class MarkerAsyncTask extends AsyncTask<Void, AbstractMarker, Void> {
                             float yf = ((FloatTag) pos.get(1)).getValue();
                             float zf = ((FloatTag) pos.get(2)).getValue();
 
-                            this.publishProgress(new EntityMarker(Math.round(xf), Math.round(yf), Math.round(zf), dimension, e.displayName, e));
+                            this.publishProgress(new EntityMarker(Math.round(xf), Math.round(yf), Math.round(zf), dimension, e.displayName, e, false));
                         }
                     }
                 }
@@ -92,7 +95,7 @@ public class MarkerAsyncTask extends AsyncTask<Void, AbstractMarker, Void> {
                             int eY = ((IntTag) compoundTag.getChildTagByKey("y")).getValue();
                             int eZ = ((IntTag) compoundTag.getChildTagByKey("z")).getValue();
 
-                            this.publishProgress(new TileEntityMarker(Math.round(eX), Math.round(eY), Math.round(eZ), dimension, te.displayName, te));
+                            this.publishProgress(new TileEntityMarker(Math.round(eX), Math.round(eY), Math.round(eZ), dimension, te.displayName, te, false));
                         }
                     }
                 }
@@ -100,6 +103,13 @@ public class MarkerAsyncTask extends AsyncTask<Void, AbstractMarker, Void> {
         } catch (Exception e){
             Log.w(e.getMessage());
         }
+    }
+
+    private void loadCustomMarkers(int chunkX, int chunkZ){
+        Collection<AbstractMarker> chunk = worldProvider.getWorld().getMarkerManager()
+                .getMarkersOfChunk(chunkX, chunkZ);
+        AbstractMarker[] markers = new AbstractMarker[chunk.size()];
+        this.publishProgress(chunk.toArray(markers));
     }
 
     @Override

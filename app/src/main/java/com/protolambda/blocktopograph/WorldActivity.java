@@ -1,6 +1,5 @@
 package com.protolambda.blocktopograph;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -12,7 +11,6 @@ import android.support.v7.app.ActionBar;
 import android.text.Editable;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 
@@ -30,23 +28,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.protolambda.blocktopograph.map.CustomMarkerManager;
 import com.protolambda.blocktopograph.map.Dimension;
 import com.protolambda.blocktopograph.map.marker.AbstractMarker;
 import com.protolambda.blocktopograph.nbt.convert.NBTConstants;
-import com.protolambda.blocktopograph.nbt.tags.FloatTag;
-import com.protolambda.blocktopograph.nbt.tags.IntTag;
-import com.protolambda.blocktopograph.nbt.tags.ListTag;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import com.protolambda.blocktopograph.chunk.ChunkData;
 import com.protolambda.blocktopograph.chunk.NBTChunkData;
-import com.protolambda.blocktopograph.chunk.RegionDataType;
 import com.protolambda.blocktopograph.map.MapFragment;
 import com.protolambda.blocktopograph.map.renderer.MapType;
 import com.protolambda.blocktopograph.nbt.EditableNBT;
@@ -349,7 +340,6 @@ public class WorldActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
 
         //some text pop-up dialogs, some with simple HTML tags.
-        //TODO refactor into text-dialog utility (with boolean parameter for HTML content)
         switch (item.getItemId()) {
             case R.id.action_about: {
 
@@ -734,7 +724,6 @@ public class WorldActivity extends AppCompatActivity
 
     public void openMultiplayerEditor(){
 
-        // TODO not translation-friendly
 
         //takes some time to find all players...
         // TODO make more responsive
@@ -846,7 +835,7 @@ public class WorldActivity extends AppCompatActivity
         });
     }
 
-    /** Opens a editableNBT for just the subTag if it is not null.
+    /** Opens an editableNBT for just the subTag if it is not null.
      Opens the whole level.dat if subTag is null. **/
     public EditableNBT openEditableNbtLevel(String subTagName){
 
@@ -1008,7 +997,6 @@ public class WorldActivity extends AppCompatActivity
 
         final FragmentManager manager = getFragmentManager();
 
-        //TODO not translation-friendly
         // confirmContentClose shouldn't be both used as boolean and as close-message,
         //  this is a bad pattern
         if(confirmContentClose != null){
@@ -1034,9 +1022,7 @@ public class WorldActivity extends AppCompatActivity
     /** Open NBT editor fragment for the given editableNBT */
     public void openNBTEditor(EditableNBT editableNBT){
 
-        //TODO not translation-friendly
         // see changeContentFragment(callback)
-
         this.confirmContentClose = getString(R.string.confirm_close_nbt_editor);
 
         EditorFragment editorFragment = new EditorFragment();
@@ -1077,37 +1063,9 @@ public class WorldActivity extends AppCompatActivity
     }
 
 
-    //TODO This stuff should be moved to the MapFragment class.
-    //TODO not translation-friendly
-    public enum LongClickOption {
-
-        TELEPORT_LOCAL_PLAYER(R.string.teleport_local_player, null),
-        CREATE_MARKER(R.string.create_custom_marker, null),
-        //TODO TELEPORT_MULTI_PLAYER("Teleport other player", null),
-        ENTITY(R.string.open_chunk_entity_nbt, RegionDataType.ENTITY),
-        TILE_ENTITY(R.string.open_chunk_tile_entity_nbt, RegionDataType.TILE_ENTITY);
-
-        public final int stringId;
-        public final RegionDataType dataType;
-
-        LongClickOption(int id, RegionDataType dataType){
-            this.stringId = id;
-            this.dataType = dataType;
-        }
-
-    }
-
-    public String[] getLongClickOptions(){
-        LongClickOption[] values = LongClickOption.values();
-        int len = values.length;
-        String[] options = new String[len];
-        for(int i = 0; i < len; i++){
-            options[i] = getString(values[i].stringId);
-        }
-        return options;
-    }
 
     /** Open a dialog; user chooses chunk-type -> open editor for this type **/
+    @Override
     public void openChunkNBTEditor(final int chunkX, final int chunkZ, final ChunkData chunkData){
 
         //TODO we should start supporting some basic terrain data editing,
@@ -1184,278 +1142,5 @@ public class WorldActivity extends AppCompatActivity
 
     }
 
-
-    //TODO move to MapFragment
-    @Override
-    public void onLongClick(final double worldX, final double worldZ){
-
-        double chunkX = worldX / dimension.chunkW;
-        double chunkZ = worldZ / dimension.chunkL;
-
-        //negative doubles are rounded up when casting to int; floor them
-        final int chunkXint = chunkX < 0 ? (((int) chunkX) - 1) : ((int) chunkX);
-        final int chunkZint = chunkZ < 0 ? (((int) chunkZ) - 1) : ((int) chunkZ);
-
-        final Dimension dim = dimension;
-
-
-        final View container = this.findViewById(R.id.world_content);
-        if(container == null){
-            Log.w("CANNOT FIND MAIN CONTAINER, WTF");
-            return;
-        }
-
-        //TODO not translation-friendly
-        new AlertDialog.Builder(this)
-                .setTitle(String.format(Locale.ENGLISH, "Pos: %.2f;%.2f Chunk: %d;%d Dimension: %s", worldX, worldZ, chunkXint, chunkZint, dimension.name))
-                .setItems(getLongClickOptions(), new DialogInterface.OnClickListener() {
-                    @SuppressLint("SetTextI18n")
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        final LongClickOption chosen = LongClickOption.values()[which];
-
-                        switch (chosen){
-                            case TELEPORT_LOCAL_PLAYER:{
-                                try {
-
-                                    final EditableNBT playerEditable = getEditablePlayer();
-                                    if(playerEditable == null) throw new Exception("Player is null");
-
-                                    Iterator playerIter = playerEditable.getTags().iterator();
-                                    if(!playerIter.hasNext()) throw new Exception("Player DB entry is empty!");
-
-                                    //db entry consists of one compound tag
-                                    final CompoundTag playerTag = (CompoundTag) playerIter.next();
-
-                                    ListTag posVec = (ListTag) playerTag.getChildTagByKey("Pos");
-
-                                    if (posVec == null) throw new Exception("No \"Pos\" specified");
-
-                                    final List<Tag> playerPos = posVec.getValue();
-                                    if(playerPos == null)
-                                        throw new Exception("No \"Pos\" specified");
-                                    if (playerPos.size() != 3)
-                                        throw new Exception("\"Pos\" value is invalid. value: " + posVec.getValue().toString());
-
-                                    final IntTag dimensionId = (IntTag) playerTag.getChildTagByKey("DimensionId");
-                                    if(dimensionId == null || dimensionId.getValue() == null)
-                                        throw new Exception("No \"DimensionId\" specified");
-
-
-                                    float playerY = (float) playerPos.get(1).getValue();
-
-
-                                    View yForm = LayoutInflater.from(WorldActivity.this).inflate(R.layout.y_coord_form, null);
-                                    final EditText yInput = (EditText) yForm.findViewById(R.id.y_input);
-                                    yInput.setText(String.valueOf(playerY));
-
-                                    final float newX = (float) worldX;
-                                    final float newZ = (float) worldZ;
-                                    final Dimension newDimension = dimension;
-
-                                    new AlertDialog.Builder(WorldActivity.this)
-                                            .setTitle(chosen.stringId)
-                                            .setView(yForm)
-                                            .setPositiveButton("Teleport!", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-
-                                                    float newY;
-                                                    Editable value = yInput.getText();
-                                                    if(value == null) newY = 64f;
-                                                    else {
-                                                        try {
-                                                            newY = (float) Float.parseFloat(value.toString());//removes excessive precision
-                                                        } catch (Exception e){
-                                                            newY = 64f;
-                                                        }
-                                                    }
-
-                                                    ((FloatTag) playerPos.get(0)).setValue(newX);
-                                                    ((FloatTag) playerPos.get(1)).setValue(newY);
-                                                    ((FloatTag) playerPos.get(2)).setValue(newZ);
-                                                    dimensionId.setValue(newDimension.id);
-
-                                                    if(playerEditable.save()){
-
-                                                        if(mapFragment != null)
-                                                            mapFragment.moveMarker(
-                                                                    mapFragment.localPlayerMarker,
-                                                                    (int) newX, (int) newY, (int) newZ, newDimension);
-
-                                                        Snackbar.make(container,
-                                                                String.format(getString(R.string.teleported_player_to_xyz_dim), newX, newY, newZ, newDimension.name),
-                                                                Snackbar.LENGTH_LONG)
-                                                                .setAction("Action", null).show();
-                                                    } else {
-                                                        Snackbar.make(container,
-                                                                R.string.failed_teleporting_player,
-                                                                Snackbar.LENGTH_LONG)
-                                                                .setAction("Action", null).show();
-                                                    }
-                                                }
-                                            })
-                                            .setCancelable(true)
-                                            .setNegativeButton(android.R.string.cancel, null)
-                                            .show();
-                                    return;
-
-                                } catch (Exception e){
-                                    e.printStackTrace();
-                                    Snackbar.make(container, R.string.failed_to_find_or_edit_local_player_data,
-                                            Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                    return;
-                                }
-                            }
-                            case CREATE_MARKER:{
-
-                                View createMarkerForm = LayoutInflater.from(WorldActivity.this).inflate(R.layout.create_marker_form, null);
-
-                                final EditText markerNameInput = (EditText) createMarkerForm.findViewById(R.id.marker_displayname_input);
-                                markerNameInput.setText(R.string.default_custom_marker_name);
-                                final EditText markerIconNameInput = (EditText) createMarkerForm.findViewById(R.id.marker_iconname_input);
-                                markerIconNameInput.setText("blue_marker");
-                                final EditText xInput = (EditText) createMarkerForm.findViewById(R.id.x_input);
-                                xInput.setText(String.valueOf((int) worldX));
-                                final EditText yInput = (EditText) createMarkerForm.findViewById(R.id.y_input);
-                                yInput.setText(String.valueOf(64));
-                                final EditText zInput = (EditText) createMarkerForm.findViewById(R.id.z_input);
-                                zInput.setText(String.valueOf((int) worldZ));
-
-
-                                new AlertDialog.Builder(WorldActivity.this)
-                                        .setTitle(chosen.stringId)
-                                        .setView(createMarkerForm)
-                                        .setPositiveButton("Create marker", new DialogInterface.OnClickListener() {
-
-                                            public void failParseSnackbarReport(int msg){
-                                                Snackbar.make(container, msg,
-                                                        Snackbar.LENGTH_LONG)
-                                                        .setAction("Action", null).show();
-                                            }
-
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-
-                                                try {
-                                                    String displayName = markerNameInput.getText().toString();
-                                                    if (displayName.equals("") || displayName.contains("\"")) {
-                                                        failParseSnackbarReport(R.string.marker_invalid_name);
-                                                        return;
-                                                    }
-                                                    String iconName = markerIconNameInput.getText().toString();
-                                                    if (iconName.equals("") || iconName.contains("\"")) {
-                                                        failParseSnackbarReport(R.string.invalid_icon_name);
-                                                        return;
-                                                    }
-
-                                                    int xM, yM, zM;
-
-                                                    String xStr = xInput.getText().toString();
-                                                    try {
-                                                        xM = Integer.parseInt(xStr);
-                                                    } catch (NumberFormatException e) {
-                                                        failParseSnackbarReport(R.string.invalid_x_coordinate);
-                                                        return;
-                                                    }
-                                                    String yStr = yInput.getText().toString();
-                                                    try {
-                                                        yM = Integer.parseInt(yStr);
-                                                    } catch (NumberFormatException e) {
-                                                        failParseSnackbarReport(R.string.invalid_y_coordinate);
-                                                        return;
-                                                    }
-
-                                                    String zStr = zInput.getText().toString();
-                                                    try {
-                                                        zM = Integer.parseInt(zStr);
-                                                    } catch (NumberFormatException e) {
-                                                        failParseSnackbarReport(R.string.invalid_z_coordinate);
-                                                        return;
-                                                    }
-
-                                                    CustomMarkerManager mng = getWorld().getMarkerManager();
-                                                    mng.addMarker(mng.markerFromData(displayName, iconName, xM, yM, zM, dimension));
-
-                                                    if(mapFragment != null) mapFragment.reloadCustomMarkers();
-
-                                                } catch (Exception e){
-                                                    e.printStackTrace();
-                                                    failParseSnackbarReport(R.string.failed_to_create_marker);
-                                                }
-                                            }
-                                        })
-                                        .setCancelable(true)
-                                        .setNegativeButton(android.R.string.cancel, null)
-                                        .show();
-
-
-
-
-
-                                return;
-                            }
-                            /* TODO multi player teleporting
-                            case TELEPORT_MULTI_PLAYER:{
-
-                                break;
-                            }*/
-                            case ENTITY:
-                            case TILE_ENTITY:{
-
-                                ChunkData chunkData;
-                                try {
-                                    chunkData = world.loadChunkData(chunkXint, chunkZint, chosen.dataType, dim);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    Snackbar.make(container, String.format(getString(R.string.failed_to_load_x), getString(chosen.stringId)),
-                                            Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                    return;
-                                }
-
-                                //ask the user if he/she wants to create the data, if loading got nothing
-                                if (chunkData == null) {
-
-                                    new AlertDialog.Builder(WorldActivity.this)
-                                            .setTitle(R.string.nbt_editor)
-                                            .setMessage(R.string.data_does_not_exist_for_chunk_ask_if_create)
-                                            .setIcon(R.drawable.ic_action_save_b)
-                                            .setPositiveButton(android.R.string.yes,
-                                                    new DialogInterface.OnClickListener() {
-                                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                                            Snackbar.make(container, R.string.creating_and_saving_chunk_NBT_data, Snackbar.LENGTH_LONG)
-                                                                    .setAction("Action", null).show();
-                                                            ChunkData newChunkData = world.createEmptyChunkData(chunkXint, chunkZint, chosen.dataType, dim);
-                                                            if (newChunkData != null) {
-                                                                Snackbar.make(container, R.string.created_and_saved_chunk_NBT_data, Snackbar.LENGTH_LONG)
-                                                                        .setAction("Action", null).show();
-                                                                openChunkNBTEditor(chunkXint, chunkZint, newChunkData);
-                                                            } else {
-                                                                Snackbar.make(container, R.string.failed_to_create_or_save_chunk_NBT_data, Snackbar.LENGTH_LONG)
-                                                                        .setAction("Action", null).show();
-                                                            }
-                                                        }
-                                                    })
-                                            .setNegativeButton(android.R.string.no, null)
-                                            .show();
-
-                                } else {
-
-                                    //just open the editor if the data is there for us to edit it
-                                    openChunkNBTEditor(chunkXint, chunkZint, chunkData);
-                                }
-                            }
-                        }
-
-
-                    }
-                })
-                .setCancelable(true)
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-
-    }
 
 }

@@ -10,18 +10,23 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
+import android.text.Layout;
 import android.text.TextWatcher;
 import com.protolambda.blocktopograph.Log;
+
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +36,7 @@ import com.protolambda.blocktopograph.WorldActivity;
 import com.protolambda.blocktopograph.WorldActivityInterface;
 import com.protolambda.blocktopograph.nbt.convert.NBTConstants;
 import com.protolambda.blocktopograph.nbt.tags.*;
+import com.unnamed.b.atv.holder.SimpleViewHolder;
 import com.unnamed.b.atv.model.TreeNode;
 import com.unnamed.b.atv.view.AndroidTreeView;
 
@@ -93,7 +99,7 @@ public class EditorFragment extends Fragment {
 
         @Override
         public int getContainerStyle() {
-            return R.style.TreeNodeStyleCustom;
+            return R.style.TreeNodeStyleCustomRoot;
         }
     }
 
@@ -497,10 +503,13 @@ public class EditorFragment extends Fragment {
         }
 
         FrameLayout frame = (FrameLayout) rootView.findViewById(R.id.nbt_editor_frame);
+
         final AndroidTreeView tree = new AndroidTreeView(getActivity(), superRoot);
         tree.setUse2dScroll(true);
 
         final View treeView = tree.getView();
+
+        treeView.setScrollContainer(true);
 
         tree.setDefaultNodeLongClickListener(new TreeNode.TreeNodeLongClickListener() {
             @Override

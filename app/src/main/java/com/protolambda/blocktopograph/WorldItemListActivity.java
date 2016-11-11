@@ -25,12 +25,16 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.protolambda.blocktopograph.nbt.tags.LongTag;
 import com.protolambda.blocktopograph.worldlist.WorldItemDetailActivity;
 import com.protolambda.blocktopograph.worldlist.WorldItemDetailFragment;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class WorldItemListActivity extends AppCompatActivity {
@@ -287,7 +291,7 @@ public class WorldItemListActivity extends AppCompatActivity {
         //returns true if it has loaded a new list of worlds, false otherwise
         public boolean reloadWorldList(){
             mValues.clear();
-            File saves[] = savesFolder.exists() ? savesFolder.listFiles(new FileFilter() {
+            File[] saves = savesFolder.exists() ? savesFolder.listFiles(new FileFilter() {
                 @Override
                 public boolean accept(File pathname) {
                     return new File(pathname + "/level.dat").exists();
@@ -310,6 +314,18 @@ public class WorldItemListActivity extends AppCompatActivity {
                     }
                 }
             }
+
+            Collections.sort(mValues, new Comparator<World>() {
+                @Override
+                public int compare(World a, World b) {
+                    try {
+                        return ((LongTag) b.level.getChildTagByKey("LastPlayed")).getValue()
+                     .compareTo(((LongTag) a.level.getChildTagByKey("LastPlayed")).getValue());
+                    } catch (Exception e) {
+                        return 0;
+                    }
+                }
+            });
 
             //load data into view
             this.notifyDataSetChanged();
