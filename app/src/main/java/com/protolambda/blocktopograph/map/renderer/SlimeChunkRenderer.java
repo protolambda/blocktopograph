@@ -2,7 +2,9 @@ package com.protolambda.blocktopograph.map.renderer;
 
 import android.graphics.Bitmap;
 
+import com.protolambda.blocktopograph.chunk.ChunkData;
 import com.protolambda.blocktopograph.chunk.ChunkManager;
+import com.protolambda.blocktopograph.chunk.Version;
 import com.protolambda.blocktopograph.map.Dimension;
 import com.protolambda.blocktopograph.util.MTwister;
 
@@ -27,7 +29,7 @@ public class SlimeChunkRenderer implements MapRenderer {
      * @param pL length (Z) of one block in pixels
      * @return bm is returned back
      */
-    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL){
+    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL) throws Version.VersionException, ChunkData.ChunkDataException {
 
         int x, z, i, j, tX, tY;
 

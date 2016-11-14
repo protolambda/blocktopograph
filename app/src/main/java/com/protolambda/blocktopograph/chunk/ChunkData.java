@@ -1,26 +1,26 @@
 package com.protolambda.blocktopograph.chunk;
 
-import com.protolambda.blocktopograph.map.Dimension;
-
-import java.io.IOException;
-
 
 public abstract class ChunkData {
 
-    public RegionDataType dataType;
-    public Dimension dimension;
+    public final Chunk chunk;
 
-    public ChunkData(RegionDataType dataType, Dimension dimension){
-        this.dataType = dataType;
-        this.dimension = dimension;
+    public final byte subChunk;
+
+    public ChunkData(Chunk chunk, byte subChunk){
+        this.chunk = chunk;
+        this.subChunk = subChunk;
     }
-
-    public boolean isAltered = false;
-
-    public abstract void loadFromByteArray(byte[] data) throws IOException;
-
-    public abstract byte[] toByteArray() throws IOException;
 
     public abstract void createEmpty();
 
+    public static class ChunkDataException extends Exception {
+
+        public final Exception wrapped;
+
+        public ChunkDataException(Exception e){
+            super("ChunkDataException! "+e.getMessage());
+            this.wrapped = e;
+        }
+    }
 }

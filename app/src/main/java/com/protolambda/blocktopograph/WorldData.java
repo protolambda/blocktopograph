@@ -2,7 +2,7 @@ package com.protolambda.blocktopograph;
 
 import android.annotation.SuppressLint;
 
-import com.protolambda.blocktopograph.chunk.RegionDataType;
+import com.protolambda.blocktopograph.chunk.ChunkTag;
 import com.protolambda.blocktopograph.map.Dimension;
 import com.litl.leveldb.Iterator;
 import com.litl.leveldb.DB;
@@ -118,28 +118,28 @@ public class WorldData {
         this.db = null;
     }
 
-    public byte[] getChunkData(int x, int z, RegionDataType type, Dimension dimension) throws WorldDBException, WorldDBLoadException {
+    public byte[] getChunkData(int x, int z, ChunkTag type, Dimension dimension, byte subChunk, boolean asSubChunk) throws WorldDBException, WorldDBLoadException {
 
         //ensure that the db is opened
         this.openDB();
 
-        byte[] chunkKey = getChunkDataKey(x, z, type, dimension);
+        byte[] chunkKey = getChunkDataKey(x, z, type, dimension, subChunk, asSubChunk);
         //Log.d("Getting cX: "+x+" cZ: "+z+ " with key: "+bytesToHex(chunkKey, 0, chunkKey.length));
         return db.get(chunkKey);
     }
 
-    public void writeChunkData(int x, int z, RegionDataType type, byte[] chunkData, Dimension dimension) throws WorldDBException {
+    public void writeChunkData(int x, int z, ChunkTag type, Dimension dimension, byte subChunk, boolean asSubChunk, byte[] chunkData) throws WorldDBException {
         //ensure that the db is opened
         this.openDB();
 
-        db.put(getChunkDataKey(x, z, type, dimension), chunkData);
+        db.put(getChunkDataKey(x, z, type, dimension, subChunk, asSubChunk), chunkData);
     }
 
-    public void removeChunkData(int x, int z, RegionDataType type, Dimension dimension) throws WorldDBException {
+    public void removeChunkData(int x, int z, ChunkTag type, Dimension dimension, byte subChunk, boolean asSubChunk) throws WorldDBException {
         //ensure that the db is opened
         this.openDB();
 
-        db.delete(getChunkDataKey(x, z, type, dimension));
+        db.delete(getChunkDataKey(x, z, type, dimension, subChunk, asSubChunk));
     }
 
     public String[] getPlayers(){
@@ -162,19 +162,21 @@ public class WorldData {
         return items;
     }
 
-    public static byte[] getChunkDataKey(int x, int z, RegionDataType type, Dimension dimension){
+    public static byte[] getChunkDataKey(int x, int z, ChunkTag type, Dimension dimension, byte subChunk, boolean asSubChunk){
         if(dimension == Dimension.OVERWORLD) {
-            byte[] key = new byte[9];
+            byte[] key = new byte[asSubChunk ? 10 : 9];
             System.arraycopy(getReversedBytes(x), 0, key, 0, 4);
             System.arraycopy(getReversedBytes(z), 0, key, 4, 4);
             key[8] = type.dataID;
+            if(asSubChunk) key[9] = subChunk;
             return key;
         } else {
-            byte[] key = new byte[13];
+            byte[] key = new byte[asSubChunk ? 14 : 13];
             System.arraycopy(getReversedBytes(x), 0, key, 0, 4);
             System.arraycopy(getReversedBytes(z), 0, key, 4, 4);
             System.arraycopy(getReversedBytes(dimension.id), 0, key, 8, 4);
             key[12] = type.dataID;
+            if(asSubChunk) key[13] = subChunk;
             return key;
         }
     }

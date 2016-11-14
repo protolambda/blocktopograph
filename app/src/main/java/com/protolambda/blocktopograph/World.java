@@ -1,7 +1,7 @@
 package com.protolambda.blocktopograph;
 
 import com.protolambda.blocktopograph.chunk.ChunkData;
-import com.protolambda.blocktopograph.chunk.RegionDataType;
+import com.protolambda.blocktopograph.chunk.ChunkTag;
 import com.protolambda.blocktopograph.map.MarkerManager;
 import com.protolambda.blocktopograph.map.Dimension;
 import com.protolambda.blocktopograph.nbt.convert.LevelDataConverter;
@@ -128,11 +128,9 @@ public class World implements Serializable {
         return this.worldData;
     }
 
-    public ChunkData loadChunkData(int chunkX, int chunkZ, RegionDataType dataType, Dimension dimension) throws Exception {
-        ChunkData data = dataType.newInstance(dimension);
-        if(data == null) throw new Exception("Unhandled Regiondatatype!");
-        data.loadFromByteArray(getWorldData().getChunkData(chunkX, chunkZ, dataType, dimension));
-        return data;
+    /*
+    public byte[] loadChunkData(int chunkX, int chunkZ, ChunkTag dataType, Dimension dimension) throws WorldData.WorldDBLoadException, WorldData.WorldDBException {
+        return getWorldData().getChunkData(chunkX, chunkZ, dataType, dimension);
     }
 
     public void saveChunkData(int chunkX, int chunkZ, ChunkData chunkData) throws IOException, WorldData.WorldDBException {
@@ -141,8 +139,9 @@ public class World implements Serializable {
         else getWorldData().removeChunkData(chunkX, chunkZ, chunkData.dataType, chunkData.dimension);
     }
 
+
     //returns true if creating and saving was successful
-    public ChunkData createEmptyChunkData(int chunkX, int chunkZ, RegionDataType dataType, Dimension dimension){
+    public ChunkData createEmptyChunkData(int chunkX, int chunkZ, ChunkTag dataType, Dimension dimension){
 
         ChunkData data = dataType.newInstance(dimension);
         if(data == null) return null;
@@ -157,6 +156,7 @@ public class World implements Serializable {
             return null;
         }
     }
+    */
 
     public void closeDown() throws WorldData.WorldDBException {
         if(this.worldData != null) this.worldData.closeDB();

@@ -1,69 +1,61 @@
 package com.protolambda.blocktopograph.chunk;
 
-import com.protolambda.blocktopograph.Log;
-
+import com.protolambda.blocktopograph.WorldData;
+import com.protolambda.blocktopograph.chunk.terrain.TerrainChunkData;
 import com.protolambda.blocktopograph.map.Dimension;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class Chunk {
 
+    public final WorldData worldData;
+
     public final int x, z;
     public final Dimension dimension;
 
-    public Map<RegionDataType, ChunkData> chunkDataMap;
+    private Version version;
 
-    public Chunk(int x, int z, Dimension dimension) {
+    private volatile TerrainChunkData[]
+            terrain = new TerrainChunkData[256];
+
+    private volatile NBTChunkData[]
+            entity = new NBTChunkData[256],
+            blockEntity = new NBTChunkData[256];
+
+    public Chunk(WorldData worldData, int x, int z, Dimension dimension) {
+        this.worldData = worldData;
         this.x = x;
         this.z = z;
         this.dimension = dimension;
-        chunkDataMap = new HashMap<>();
     }
 
-    public ChunkData getChunkData(RegionDataType dataType){
-        return chunkDataMap.get(dataType);
-    }
-
-    public ChunkData loadChunkData(RegionDataType dataType, byte[] rawData) throws IOException {
-
-        //data does not exist in save file
-        if(rawData == null){
-            //Log.w("Warning! no raw data! cx: "+this.x+" cz: "+this.z);
-            return null;
-        }
-
-        ChunkData data = dataType.newInstance(dimension);
-        //data may not be handled
-        if(data == null){
-            Log.w("Warning! Unhandled dataType!");
-            return null;
-        }
-
-        //load raw data into the data object
-        data.loadFromByteArray(rawData);
-
-        chunkDataMap.put(dataType, data);
-
+    public TerrainChunkData getTerrain(byte subChunk) throws Version.VersionException {
+        TerrainChunkData data = terrain[subChunk];
+        if(data == null) terrain[subChunk] = this.getVersion().createTerrainChunkData(this, subChunk);
         return data;
     }
 
-    public byte[] chunkDataToRawData(RegionDataType dataType) throws IOException {
-        ChunkData data = chunkDataMap.get(dataType);
-        return data == null ? null : data.toByteArray();
+    public NBTChunkData getEntity(byte subChunk) throws Version.VersionException {
+        NBTChunkData data = entity[subChunk];
+        if(data == null) entity[subChunk] = this.getVersion().createEntityChunkData(this, subChunk);
+        return data;
     }
 
-    public boolean createEmptyData(RegionDataType dataType){
-        ChunkData data = dataType.newInstance(dimension);
-        if(data == null) return false;
 
-        data.createEmpty();
-
-        this.chunkDataMap.put(dataType, data);
-
-        return true;
+    public NBTChunkData getBlockEntity(byte subChunk) throws Version.VersionException {
+        NBTChunkData data = blockEntity[subChunk];
+        if(data == null) blockEntity[subChunk] = this.getVersion().createBlockEntityChunkData(this, subChunk);
+        return data;
     }
 
+    public Version getVersion(){
+        if(this.version == null) try {
+            byte[] data = this.worldData.getChunkData(x, z, ChunkTag.VERSION, dimension, (byte) 0, false);
+            this.version = Version.getVersion(data);
+        } catch (WorldData.WorldDBLoadException | WorldData.WorldDBException e) {
+            e.printStackTrace();
+            this.version = Version.ERROR;
+        }
+
+        return this.version;
+    }
 }

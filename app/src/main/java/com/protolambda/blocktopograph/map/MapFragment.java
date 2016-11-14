@@ -35,7 +35,7 @@ import com.protolambda.blocktopograph.WorldActivity;
 import com.protolambda.blocktopograph.WorldActivityInterface;
 import com.protolambda.blocktopograph.WorldData;
 import com.protolambda.blocktopograph.chunk.ChunkData;
-import com.protolambda.blocktopograph.chunk.RegionDataType;
+import com.protolambda.blocktopograph.chunk.ChunkTag;
 import com.protolambda.blocktopograph.map.marker.AbstractMarker;
 import com.protolambda.blocktopograph.map.marker.MarkerImageView;
 import com.protolambda.blocktopograph.map.marker.WorldDataMarker;
@@ -1039,13 +1039,13 @@ public class MapFragment extends Fragment {
         TELEPORT_LOCAL_PLAYER(R.string.teleport_local_player, null),
         CREATE_MARKER(R.string.create_custom_marker, null),
         //TODO TELEPORT_MULTI_PLAYER("Teleport other player", null),
-        ENTITY(R.string.open_chunk_entity_nbt, RegionDataType.ENTITY),
-        TILE_ENTITY(R.string.open_chunk_tile_entity_nbt, RegionDataType.TILE_ENTITY);
+        ENTITY(R.string.open_chunk_entity_nbt, ChunkTag.ENTITY),
+        TILE_ENTITY(R.string.open_chunk_tile_entity_nbt, ChunkTag.TILE_ENTITY);
 
         public final int stringId;
-        public final RegionDataType dataType;
+        public final ChunkTag dataType;
 
-        LongClickOption(int id, RegionDataType dataType){
+        LongClickOption(int id, ChunkTag dataType){
             this.stringId = id;
             this.dataType = dataType;
         }

@@ -1,6 +1,5 @@
 package com.protolambda.blocktopograph.chunk;
 
-import com.protolambda.blocktopograph.map.Dimension;
 import com.protolambda.blocktopograph.nbt.convert.DataConverter;
 import com.protolambda.blocktopograph.nbt.tags.IntTag;
 import com.protolambda.blocktopograph.nbt.tags.Tag;
@@ -14,16 +13,17 @@ public class NBTChunkData extends ChunkData {
 
     public List<Tag> tags = new ArrayList<>();
 
-    public NBTChunkData(RegionDataType dataType, Dimension dimension) {
-        super(dataType, dimension);
+    public final ChunkTag dataType;
+
+    public NBTChunkData(Chunk chunk, byte subChunk, ChunkTag dataType) {
+        super(chunk, subChunk);
+        this.dataType = dataType;
     }
 
-    @Override
     public void loadFromByteArray(byte[] data) throws IOException {
         if (data != null && data.length > 0) this.tags = DataConverter.read(data);
     }
 
-    @Override
     public byte[] toByteArray() throws IOException {
         if (this.tags == null) this.tags = new ArrayList<>();
         return DataConverter.write(this.tags);

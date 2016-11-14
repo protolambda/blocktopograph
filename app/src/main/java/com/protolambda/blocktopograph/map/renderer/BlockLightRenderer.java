@@ -2,10 +2,12 @@ package com.protolambda.blocktopograph.map.renderer;
 
 import android.graphics.Bitmap;
 
-import com.protolambda.blocktopograph.chunk.Chunk;
+import com.protolambda.blocktopograph.chunk.ChunkData;
 import com.protolambda.blocktopograph.chunk.ChunkManager;
-import com.protolambda.blocktopograph.chunk.RegionDataType;
-import com.protolambda.blocktopograph.chunk.TerrainChunkData;
+import com.protolambda.blocktopograph.chunk.ChunkTag;
+import com.protolambda.blocktopograph.chunk.Version;
+import com.protolambda.blocktopograph.chunk.terrain.TerrainChunkData;
+import com.protolambda.blocktopograph.chunk.terrain.V0_9_TerrainChunkData;
 import com.protolambda.blocktopograph.map.Dimension;
 
 
@@ -29,9 +31,9 @@ public class BlockLightRenderer implements MapRenderer {
      * @param pL length (Z) of one block in pixels
      * @return bm is returned back
      */
-    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL){
+    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL) throws Version.VersionException, ChunkData.ChunkDataException {
 
-        TerrainChunkData data = (TerrainChunkData) cm.getChunkData(chunkX, chunkZ, RegionDataType.TERRAIN);
+        TerrainChunkData data = cm.getChunk(chunkX, chunkZ).getTerrain((byte) 0);
         if(data == null) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
 
 

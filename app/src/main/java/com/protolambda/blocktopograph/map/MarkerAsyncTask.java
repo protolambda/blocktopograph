@@ -5,7 +5,7 @@ import com.protolambda.blocktopograph.Log;
 
 import com.protolambda.blocktopograph.WorldActivityInterface;
 import com.protolambda.blocktopograph.chunk.NBTChunkData;
-import com.protolambda.blocktopograph.chunk.RegionDataType;
+import com.protolambda.blocktopograph.chunk.ChunkTag;
 import com.protolambda.blocktopograph.map.marker.AbstractMarker;
 import com.protolambda.blocktopograph.map.marker.EntityMarker;
 import com.protolambda.blocktopograph.map.marker.TileEntityMarker;
@@ -18,7 +18,6 @@ import com.protolambda.blocktopograph.nbt.tags.Tag;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Load the NBT of the chunks and output the markers, async with both map-rendering and UI
@@ -57,7 +56,7 @@ public class MarkerAsyncTask extends AsyncTask<Void, AbstractMarker, Void> {
     private void loadEntityMarkers(int chunkX, int chunkZ){
         try {
             Dimension dimension = worldProvider.getDimension();
-            NBTChunkData entityData = (NBTChunkData) worldProvider.getWorld().loadChunkData(chunkX, chunkZ, RegionDataType.ENTITY, dimension);
+            NBTChunkData entityData = (NBTChunkData) worldProvider.getWorld().loadChunkData(chunkX, chunkZ, ChunkTag.ENTITY, dimension);
             if(entityData != null){
                 for(Tag tag : entityData.tags){
                     if (tag instanceof CompoundTag) {
@@ -83,7 +82,7 @@ public class MarkerAsyncTask extends AsyncTask<Void, AbstractMarker, Void> {
     private void loadTileEntityMarkers(int chunkX, int chunkZ){
         try {
             Dimension dimension = worldProvider.getDimension();
-            NBTChunkData tileEntityData = (NBTChunkData) worldProvider.getWorld().loadChunkData(chunkX, chunkZ, RegionDataType.TILE_ENTITY, dimension);
+            NBTChunkData tileEntityData = (NBTChunkData) worldProvider.getWorld().loadChunkData(chunkX, chunkZ, ChunkTag.TILE_ENTITY, dimension);
             if(tileEntityData != null){
                 for(Tag tag : tileEntityData.tags){
                     if (tag instanceof CompoundTag) {
