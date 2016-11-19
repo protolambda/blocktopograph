@@ -2,12 +2,10 @@ package com.protolambda.blocktopograph.map.renderer;
 
 import android.graphics.Bitmap;
 
-import com.protolambda.blocktopograph.chunk.ChunkData;
+import com.protolambda.blocktopograph.chunk.Chunk;
 import com.protolambda.blocktopograph.chunk.ChunkManager;
-import com.protolambda.blocktopograph.chunk.ChunkTag;
 import com.protolambda.blocktopograph.chunk.Version;
 import com.protolambda.blocktopograph.chunk.terrain.TerrainChunkData;
-import com.protolambda.blocktopograph.chunk.terrain.V0_9_TerrainChunkData;
 import com.protolambda.blocktopograph.map.Dimension;
 
 
@@ -15,7 +13,7 @@ public class HeightmapRenderer implements MapRenderer {
 
     /**
      * Render a single chunk to provided bitmap (bm)
-     * @param cm Chunkmanager, provides chunks, which provide chunk-data
+     * @param cm ChunkManager, provides chunks, which provide chunk-data
      * @param bm Bitmap to render to
      * @param dimension Mapped dimension
      * @param chunkX X chunk coordinate (x-block coord / Chunk.WIDTH)
@@ -29,15 +27,26 @@ public class HeightmapRenderer implements MapRenderer {
      * @param pW width (X) of one block in pixels
      * @param pL length (Z) of one block in pixels
      * @return bm is returned back
+     *
+     * @throws Version.VersionException when the version of the chunk is unsupported.
      */
-    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL) throws Version.VersionException, ChunkData.ChunkDataException {
+    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL) throws Version.VersionException {
 
-        TerrainChunkData data = cm.getChunk(chunkX, chunkZ).getTerrain((byte) 0);
-        if(data == null) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+        Chunk chunk = cm.getChunk(chunkX, chunkZ);
+        Version cVersion = chunk.getVersion();
+
+        if(cVersion == Version.ERROR) return MapType.ERROR.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+
+        //the bottom sub-chunk is sufficient to get heightmap data.
+        TerrainChunkData data = chunk.getTerrain((byte) 0);
+        if(data == null || !data.load2DData()) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+
 
         TerrainChunkData dataW = cm.getChunk(chunkX - 1, chunkZ).getTerrain((byte) 0);
         TerrainChunkData dataN = cm.getChunk(chunkX, chunkZ-1).getTerrain((byte) 0);
 
+        boolean west = dataW != null && dataW.load2DData(),
+                north = dataN != null && dataN.load2DData();
 
         int x, y, z, color, i, j, tX, tY;
         int yW, yN;
@@ -55,10 +64,10 @@ public class HeightmapRenderer implements MapRenderer {
                 yNorm2 = yNorm*yNorm;
                 yNorm = ((6f*yNorm2) - (15f*yNorm) + 10f)*yNorm2*yNorm;
 
-                yW = (x == 0) ? (dataW != null ? dataW.getHighestBlockYAt(dimension.chunkW - 1, z) : y)//chunk edge
-                        : data.getHighestBlockYAt(x - 1, z);//within chunk
-                yN = (z == 0) ? (dataN != null ? dataN.getHighestBlockYAt(x, dimension.chunkL - 1) : y)//chunk edge
-                        : data.getHighestBlockYAt(x, z - 1);//within chunk
+                yW = (x == 0) ? (west ? dataW.getHeightMapValue(dimension.chunkW - 1, z) : y)//chunk edge
+                        : data.getHeightMapValue(x - 1, z);//within chunk
+                yN = (z == 0) ? (north ? dataN.getHeightMapValue(x, dimension.chunkL - 1) : y)//chunk edge
+                        : data.getHeightMapValue(x, z - 1);//within chunk
 
                 heightShading = SatelliteRenderer.getHeightShading(y, yW, yN);
 

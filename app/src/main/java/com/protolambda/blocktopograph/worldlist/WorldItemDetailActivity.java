@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
-import com.protolambda.blocktopograph.WorldItemListActivity;
 import com.protolambda.blocktopograph.R;
 import com.protolambda.blocktopograph.World;
 

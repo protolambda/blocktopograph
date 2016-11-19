@@ -3,14 +3,13 @@ package com.protolambda.blocktopograph;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.text.Editable;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 
@@ -22,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.protolambda.blocktopograph.chunk.ChunkData;
 import com.protolambda.blocktopograph.chunk.NBTChunkData;
 import com.protolambda.blocktopograph.map.MapFragment;
 import com.protolambda.blocktopograph.map.renderer.MapType;
@@ -47,7 +46,7 @@ import com.protolambda.blocktopograph.nbt.tags.CompoundTag;
 import com.protolambda.blocktopograph.nbt.tags.Tag;
 
 public class WorldActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, WorldActivityInterface {
+        implements NavigationView.OnNavigationItemSelectedListener, WorldActivityInterface, MenuHelper.MenuContext {
 
     private World world;
 
@@ -186,11 +185,12 @@ public class WorldActivity extends AppCompatActivity
         assert subtitle != null;
 
         /*
-            World-seed analytics.
+            World-seed & world-name analytics.
 
-            Send world-seed to the Firebase (Google analytics for Android) server.
+            Send anonymous world data to the Firebase (Google analytics for Android) server.
             This data will be pushed to Google-BigQuery.
-            Google-BigQuery will crunch the world-seeds, sorting hundreds of thousands world-seeds.
+            Google-BigQuery will crunch the world-data,
+              storing hundreds of thousands world-seeds + names.
             The goal is to automatically create a "Top 1000" popular seeds for every week.
             This "Top 1000" will be published as soon as it gets out of BigQuery,
              keep it for the sake of this greater goal. It barely uses internet bandwidth,
@@ -206,6 +206,7 @@ public class WorldActivity extends AppCompatActivity
 
         Bundle bundle = new Bundle();
         bundle.putString("seed", worldSeed);
+        bundle.putString("name", this.world.getWorldDisplayName());
 
 
 
@@ -338,64 +339,17 @@ public class WorldActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        return MenuHelper.onOptionsItemSelected(this, item);
+    }
 
-        //some text pop-up dialogs, some with simple HTML tags.
-        switch (item.getItemId()) {
-            case R.id.action_about: {
+    @Override
+    public Context getContext() {
+        return this;
+    }
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                TextView msg = new TextView(this);
-                float dpi = WorldActivity.this.getResources().getDisplayMetrics().density;
-                msg.setPadding((int)(19*dpi), (int)(5*dpi), (int)(14*dpi), (int)(5*dpi));
-                msg.setMaxLines(20);
-                msg.setMovementMethod(LinkMovementMethod.getInstance());
-                msg.setText(R.string.app_about);
-                builder.setView(msg)
-                        .setTitle(R.string.action_about)
-                        .setCancelable(true)
-                        .setNeutralButton(android.R.string.ok, null)
-                        .show();
-
-                return true;
-            }
-            case R.id.action_help: {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                TextView msg = new TextView(this);
-                float dpi = WorldActivity.this.getResources().getDisplayMetrics().density;
-                msg.setPadding((int)(19*dpi), (int)(5*dpi), (int)(14*dpi), (int)(5*dpi));
-                msg.setMaxLines(20);
-                msg.setMovementMethod(LinkMovementMethod.getInstance());
-                msg.setText(R.string.app_help);
-                builder.setView(msg)
-                        .setTitle(R.string.action_help)
-                        .setCancelable(true)
-                        .setNeutralButton(android.R.string.ok, null)
-                        .show();
-
-                return true;
-            }
-            case R.id.action_changelog: {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                TextView msg = new TextView(this);
-                float dpi = WorldActivity.this.getResources().getDisplayMetrics().density;
-                msg.setPadding((int)(19*dpi), (int)(5*dpi), (int)(14*dpi), (int)(5*dpi));
-                msg.setMaxLines(20);
-                msg.setMovementMethod(LinkMovementMethod.getInstance());
-                String content = String.format(getResources().getString(R.string.app_changelog), BuildConfig.VERSION_NAME);
-                //noinspection deprecation
-                msg.setText(Html.fromHtml(content));
-                builder.setView(msg)
-                        .setTitle(R.string.action_changelog)
-                        .setCancelable(true)
-                        .setNeutralButton(android.R.string.ok, null)
-                        .show();
-
-                return true;
-            }
-            default: {
-                return super.onOptionsItemSelected(item);
-            }
-        }
+    @Override
+    public boolean propagateOnOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -442,46 +396,59 @@ public class WorldActivity extends AppCompatActivity
                 //TODO open tools menu (world downloader/importer/exporter maybe?)
                 break;*/
             case(R.id.nav_overworld_satellite):
-                changeMapType(MapType.SATELLITE, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_SATELLITE, Dimension.OVERWORLD);
                 break;
             case(R.id.nav_overworld_cave):
-                changeMapType(MapType.CAVE, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_CAVE, Dimension.OVERWORLD);
                 break;
             case(R.id.nav_overworld_slime_chunk):
-                changeMapType(MapType.SLIME_CHUNK, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_SLIME_CHUNK, Dimension.OVERWORLD);
                 break;
             /*case(R.id.nav_overworld_debug):
                 changeMapType(MapType.DEBUG); //for debugging tiles positions, rendering, etc.
                 break;*/
             case(R.id.nav_overworld_heightmap):
-                changeMapType(MapType.HEIGHTMAP, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_HEIGHTMAP, Dimension.OVERWORLD);
                 break;
             case(R.id.nav_overworld_biome):
-                changeMapType(MapType.BIOME, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_BIOME, Dimension.OVERWORLD);
                 break;
             case(R.id.nav_overworld_grass):
-                changeMapType(MapType.GRASS, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_GRASS, Dimension.OVERWORLD);
                 break;
             case(R.id.nav_overworld_xray):
-                changeMapType(MapType.XRAY, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_XRAY, Dimension.OVERWORLD);
                 break;
             case(R.id.nav_overworld_block_light):
-                changeMapType(MapType.BLOCK_LIGHT, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_BLOCK_LIGHT, Dimension.OVERWORLD);
                 break;
             case(R.id.nav_nether_map):
                 changeMapType(MapType.NETHER, Dimension.NETHER);
                 break;
             case(R.id.nav_nether_xray):
-                changeMapType(MapType.XRAY, Dimension.NETHER);
+                changeMapType(MapType.NETHER_XRAY, Dimension.NETHER);
                 break;
             case(R.id.nav_nether_block_light):
-                changeMapType(MapType.BLOCK_LIGHT, Dimension.NETHER);
+                changeMapType(MapType.NETHER_BLOCK_LIGHT, Dimension.NETHER);
+                break;
+            case(R.id.nav_end_satellite):
+                changeMapType(MapType.END_SATELLITE, Dimension.END);
+                break;
+            case(R.id.nav_end_heightmap):
+                changeMapType(MapType.END_HEIGHTMAP, Dimension.END);
+                break;
+            case(R.id.nav_end_block_light):
+                changeMapType(MapType.END_HEIGHTMAP, Dimension.END);
                 break;
             case(R.id.nav_map_opt_toggle_grid):
                 //toggle the grid
                 this.showGrid = !this.showGrid;
                 //rerender tiles (tiles will render with toggled grid on it now)
                 if(this.mapFragment != null) this.mapFragment.resetTileView();
+                break;
+            case(R.id.nav_map_opt_filter_markers):
+                //toggle the grid
+                this.mapFragment.openMarkerFilter();
                 break;
             case(R.id.nav_map_opt_toggle_markers):
                 //toggle markers
@@ -519,10 +486,41 @@ public class WorldActivity extends AppCompatActivity
                     }
                 });
                 break;
+            case(R.id.nav_dimension0_nbt):
+                changeContentFragment(new OpenFragmentCallback() {
+                    @Override
+                    public void onOpen() {
+                        openSpecialDBEntry(World.SpecialDBEntryType.PORTALS);
+                    }
+                });
+                break;
+            case(R.id.nav_dimension1_nbt):
+                changeContentFragment(new OpenFragmentCallback() {
+                    @Override
+                    public void onOpen() {
+                        openSpecialDBEntry(World.SpecialDBEntryType.PORTALS);
+                    }
+                });
+                break;
+            case(R.id.nav_dimension2_nbt):
+                changeContentFragment(new OpenFragmentCallback() {
+                    @Override
+                    public void onOpen() {
+                        openSpecialDBEntry(World.SpecialDBEntryType.PORTALS);
+                    }
+                });
+                break;
+            case(R.id.nav_autonomous_entities_nbt):
+                changeContentFragment(new OpenFragmentCallback() {
+                    @Override
+                    public void onOpen() {
+                        openSpecialDBEntry(World.SpecialDBEntryType.PORTALS);
+                    }
+                });
+                break;
             case(R.id.nav_open_nbt_by_name): {
 
                 //TODO put this bit in its own method
-                //TODO not translation-friendly yet
 
                 final EditText keyEditText = new EditText(WorldActivity.this);
                 keyEditText.setEms(16);
@@ -690,7 +688,6 @@ public class WorldActivity extends AppCompatActivity
 
     /** Open NBT editor fragment for special database entry */
     public void openSpecialDBEntry(final World.SpecialDBEntryType entryType){
-        //TODO not translation-friendly
         try {
             EditableNBT editableEntry = openSpecialEditableNbtDbEntry(entryType);
             if(editableEntry == null) throw new Exception("\"" + entryType.keyName + "\" not found in DB.");
@@ -938,8 +935,6 @@ public class WorldActivity extends AppCompatActivity
     @Override
     public void onFatalDBError(WorldData.WorldDBException worldDBException) {
 
-        //TODO not translation-friendly
-
         Log.d(worldDBException.getMessage());
         worldDBException.printStackTrace();
 
@@ -1066,20 +1061,53 @@ public class WorldActivity extends AppCompatActivity
 
     /** Open a dialog; user chooses chunk-type -> open editor for this type **/
     @Override
-    public void openChunkNBTEditor(final int chunkX, final int chunkZ, final ChunkData chunkData){
+    public void openChunkNBTEditor(final int chunkX, final int chunkZ, final NBTChunkData nbtChunkData, final ViewGroup viewGroup){
 
-        //TODO we should start supporting some basic terrain data editing,
-        // like a replace-block(s) function
 
-        if(chunkData == null || !(chunkData instanceof NBTChunkData)){
+        if(nbtChunkData == null){
             //should never happen
-            Log.w("User tried to open non-nbt/null chunkData in the nbt-editor!!!");
+            Log.w("User tried to open null chunkData in the nbt-editor!!!");
             return;
         }
 
-        final NBTChunkData nbtChunkData = (NBTChunkData) chunkData;
+
+        try {
+            nbtChunkData.load();
+        } catch (Exception e){
+            Snackbar.make(viewGroup, this.getString(R.string.failed_to_load_x, this.getString(R.string.nbt_chunk_data)), Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
+        }
 
         final List<Tag> tags = nbtChunkData.tags;
+        if(tags == null) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.nbt_editor)
+                    .setMessage(R.string.data_does_not_exist_for_chunk_ask_if_create)
+                    .setIcon(R.drawable.ic_action_save_b)
+                    .setPositiveButton(android.R.string.yes,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    Snackbar.make(viewGroup, R.string.creating_and_saving_chunk_NBT_data, Snackbar.LENGTH_LONG)
+                                            .setAction("Action", null).show();
+                                    nbtChunkData.createEmpty();
+                                    try {
+                                        nbtChunkData.write();
+                                        Snackbar.make(viewGroup, R.string.created_and_saved_chunk_NBT_data, Snackbar.LENGTH_LONG)
+                                                .setAction("Action", null).show();
+                                        WorldActivity.this.openChunkNBTEditor(chunkX, chunkZ, nbtChunkData, viewGroup);
+                                    } catch (Exception e){
+                                        Snackbar.make(viewGroup, R.string.failed_to_create_or_save_chunk_NBT_data, Snackbar.LENGTH_LONG)
+                                                .setAction("Action", null).show();
+                                    }
+                                }
+                            })
+                    .setNegativeButton(android.R.string.no, null)
+                    .show();
+            return;
+        }
+
+
 
         //open nbt editor for entity data
         changeContentFragment(new OpenFragmentCallback() {
@@ -1107,7 +1135,7 @@ public class WorldActivity extends AppCompatActivity
                                 saveCopy.add(tag.getDeepCopy());
                             }
                             nbtChunkData.tags = saveCopy;
-                            world.saveChunkData(chunkX, chunkZ, chunkData);
+                            nbtChunkData.write();
                             return true;
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -1118,9 +1146,9 @@ public class WorldActivity extends AppCompatActivity
                     @Override
                     public String getRootTitle() {
                         final String format = "%s (cX:%d;cZ:%d)";
-                        switch (chunkData.dataType){
+                        switch ((nbtChunkData).dataType){
                             case ENTITY: return String.format(format, getString(R.string.entity_chunk_data) , chunkX, chunkZ);
-                            case TILE_ENTITY: return String.format(format, getString(R.string.tile_entity_chunk_data), chunkX, chunkZ);
+                            case BLOCK_ENTITY: return String.format(format, getString(R.string.tile_entity_chunk_data), chunkX, chunkZ);
                             default: return String.format(format, getString(R.string.nbt_chunk_data), chunkX, chunkZ);
                         }
                     }

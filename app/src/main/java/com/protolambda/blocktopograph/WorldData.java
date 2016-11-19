@@ -182,14 +182,12 @@ public class WorldData {
     }
 
     public static byte[] getReversedBytes(int i) {
-        /*
-        TODO this function is a joke, it is laziness,
-         bit-shifts with AND 0xFF are better
-         */
-        ByteBuffer b = ByteBuffer.allocate(4);
-        b.putInt(Integer.reverseBytes(i));
-
-        return b.array();
+        return new byte[]{
+                (byte) i,
+                (byte) (i >> 8),
+                (byte) (i >> 16),
+                (byte) (i >> 24)
+        };
     }
 
 }

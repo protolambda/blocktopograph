@@ -66,3 +66,6 @@ captures/
 # Keystore files
 *.jks
 keystore.properties
+
+# Firebase configuration
+app/google-services.json

@@ -1,9 +1,6 @@
 package com.protolambda.blocktopograph;
 
-import com.protolambda.blocktopograph.chunk.ChunkData;
-import com.protolambda.blocktopograph.chunk.ChunkTag;
 import com.protolambda.blocktopograph.map.MarkerManager;
-import com.protolambda.blocktopograph.map.Dimension;
 import com.protolambda.blocktopograph.nbt.convert.LevelDataConverter;
 import com.protolambda.blocktopograph.nbt.convert.NBTConstants;
 import com.protolambda.blocktopograph.nbt.tags.CompoundTag;
@@ -35,7 +32,11 @@ public class World implements Serializable {
         OVERWORLD("Overworld"),
         M_VILLAGES("mVillages"),
         PORTALS("portals"),
-        LOCAL_PLAYER("~local_player");
+        LOCAL_PLAYER("~local_player"),
+        AUTONOMOUS_ENTITIES("AutonomousEntities"),
+        DIMENSION_0("dimension0"),
+        DIMENSION_1("dimension1"),
+        DIMENSION_2("dimension2");
 
         public final String keyName;
         public final byte[] keyBytes;
@@ -76,7 +77,7 @@ public class World implements Serializable {
 
         // check for a custom world name
         File levelNameTxt = new File(this.worldFolder, "levelname.txt");
-        if(levelNameTxt.exists()) worldName = TextFile.readTextFile(levelNameTxt);// new way of naming worlds
+        if(levelNameTxt.exists()) worldName = TextFile.readTextFileFirstLine(levelNameTxt);// new way of naming worlds
         else worldName = this.worldFolder.getName();// legacy way of naming worlds
 
 
@@ -112,8 +113,6 @@ public class World implements Serializable {
 
         return markersManager;
     }
-
-
 
     /**
      * @return worldFolder name, also unique save-file ID

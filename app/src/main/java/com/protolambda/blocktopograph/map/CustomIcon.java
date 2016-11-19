@@ -3,21 +3,29 @@ package com.protolambda.blocktopograph.map;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
 
+import com.protolambda.blocktopograph.util.NamedBitmapProvider;
+import com.protolambda.blocktopograph.util.NamedBitmapProviderHandle;
 import com.protolambda.blocktopograph.util.UV;
 
 import java.io.IOException;
 import java.util.HashMap;
 
 /**
- * TODO docs
+ * CustomIcon provides an easy collection of special icons to use for markers.
  */
-public enum CustomIcon {
+public enum CustomIcon implements NamedBitmapProviderHandle, NamedBitmapProvider {
 
     DEFAULT_MARKER("default_marker", UV.ab(0, 0, 32, 32)),
     BLUE_MARKER("blue_marker", UV.ab(0, 32, 32, 64)),
     GREEN_MARKER("green_marker", UV.ab(32, 0, 64, 32)),
-    RED_MARKER("red_marker", UV.ab(32, 32, 64, 64));
+    RED_MARKER("red_marker", UV.ab(32, 32, 64, 64)),
+    AQUA_MARKER("aqua_marker", UV.ab(64, 0, 96, 32)),
+    ORANGE_MARKER("orange_marker", UV.ab(64, 32, 96, 64)),
+    YELLOW_MARKER("yellow_marker", UV.ab(96, 0, 128, 32)),
+    PURPLE_MARKER("purple_marker", UV.ab(96, 32, 128, 64)),
+    SPAWN_MARKER("spawn_marker", UV.ab(64, 64, 128, 128));
 
     public final String iconName;
     public final UV uv;
@@ -28,6 +36,30 @@ public enum CustomIcon {
         this.iconName = iconName;
         this.uv = uv;
     }
+
+    @Override
+    public Bitmap getBitmap(){
+        return this.bitmap;
+    }
+
+    @NonNull
+    @Override
+    public NamedBitmapProvider getNamedBitmapProvider(){
+        return this;
+    }
+
+    @NonNull
+    @Override
+    public String getBitmapDisplayName(){
+        return this.iconName;
+    }
+
+    @NonNull
+    @Override
+    public String getBitmapDataName() {
+        return this.iconName;
+    }
+
 
     public static void loadCustomBitmaps(AssetManager assetManager) throws IOException {
 

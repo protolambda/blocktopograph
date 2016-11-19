@@ -4,6 +4,8 @@ import com.protolambda.blocktopograph.WorldData;
 import com.protolambda.blocktopograph.chunk.terrain.TerrainChunkData;
 import com.protolambda.blocktopograph.map.Dimension;
 
+import java.util.concurrent.atomic.AtomicReferenceArray;
+
 
 public class Chunk {
 
@@ -14,12 +16,10 @@ public class Chunk {
 
     private Version version;
 
-    private volatile TerrainChunkData[]
-            terrain = new TerrainChunkData[256];
+    private AtomicReferenceArray<TerrainChunkData>
+            terrain = new AtomicReferenceArray<>(256);
 
-    private volatile NBTChunkData[]
-            entity = new NBTChunkData[256],
-            blockEntity = new NBTChunkData[256];
+    private volatile NBTChunkData entity, blockEntity;
 
     public Chunk(WorldData worldData, int x, int z, Dimension dimension) {
         this.worldData = worldData;
@@ -29,22 +29,23 @@ public class Chunk {
     }
 
     public TerrainChunkData getTerrain(byte subChunk) throws Version.VersionException {
-        TerrainChunkData data = terrain[subChunk];
-        if(data == null) terrain[subChunk] = this.getVersion().createTerrainChunkData(this, subChunk);
+        TerrainChunkData data = terrain.get(subChunk & 0xff);
+        if(data == null){
+            data = this.getVersion().createTerrainChunkData(this, subChunk);
+            terrain.set(subChunk & 0xff, data);
+        }
         return data;
     }
 
-    public NBTChunkData getEntity(byte subChunk) throws Version.VersionException {
-        NBTChunkData data = entity[subChunk];
-        if(data == null) entity[subChunk] = this.getVersion().createEntityChunkData(this, subChunk);
-        return data;
+    public NBTChunkData getEntity() throws Version.VersionException {
+        if(entity == null) entity = this.getVersion().createEntityChunkData(this);
+        return entity;
     }
 
 
-    public NBTChunkData getBlockEntity(byte subChunk) throws Version.VersionException {
-        NBTChunkData data = blockEntity[subChunk];
-        if(data == null) blockEntity[subChunk] = this.getVersion().createBlockEntityChunkData(this, subChunk);
-        return data;
+    public NBTChunkData getBlockEntity() throws Version.VersionException {
+        if(blockEntity == null) blockEntity = this.getVersion().createBlockEntityChunkData(this);
+        return blockEntity;
     }
 
     public Version getVersion(){
@@ -58,4 +59,64 @@ public class Chunk {
 
         return this.version;
     }
+
+
+    //TODO: should we use the heightmap???
+    public int getHighestBlockYAt(int x, int z) throws Version.VersionException {
+        Version cVersion = getVersion();
+        TerrainChunkData data;
+        for(int subChunk = cVersion.subChunks - 1; subChunk >= 0; subChunk--) {
+            data = this.getTerrain((byte) subChunk);
+            if (data == null || !data.loadTerrain()) continue;
+
+            for (int y = cVersion.subChunkHeight; y >= 0; y--) {
+                if (data.getBlockTypeId(x & 15, y, z & 15) != 0)
+                    return (subChunk * cVersion.subChunkHeight) + y;
+            }
+        }
+        return -1;
+    }
+
+    public int getHighestBlockYUnderAt(int x, int z, int y) throws Version.VersionException {
+        Version cVersion = getVersion();
+        int offset = y % cVersion.subChunkHeight;
+        int subChunk = y / cVersion.subChunkHeight;
+        TerrainChunkData data;
+
+        for(; subChunk >= 0; subChunk--) {
+            data = this.getTerrain((byte) subChunk);
+            if (data == null || !data.loadTerrain()) continue;
+
+            for (y = offset; y >= 0; y--) {
+                if (data.getBlockTypeId(x & 15, y, z & 15) != 0)
+                    return (subChunk * cVersion.subChunkHeight) + y;
+            }
+
+            //start at the top of the next chunk! (current offset might differ)
+            offset = cVersion.subChunkHeight - 1;
+        }
+        return -1;
+    }
+
+    public int getCaveYUnderAt(int x, int z, int y) throws Version.VersionException {
+        Version cVersion = getVersion();
+        int offset = y % cVersion.subChunkHeight;
+        int subChunk = y / cVersion.subChunkHeight;
+        TerrainChunkData data;
+
+        for(; subChunk >= 0; subChunk--) {
+            data = this.getTerrain((byte) subChunk);
+            if (data == null || !data.loadTerrain()) continue;
+            for (y = offset; y >= 0; y--) {
+                if (data.getBlockTypeId(x & 15, y, z & 15) == 0)
+                    return (subChunk * cVersion.subChunkHeight) + y;
+            }
+
+            //start at the top of the next chunk! (current offset might differ)
+            offset = cVersion.subChunkHeight - 1;
+        }
+        return -1;
+    }
+
+
 }

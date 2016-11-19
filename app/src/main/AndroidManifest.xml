@@ -3,6 +3,7 @@
 
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -27,7 +28,7 @@
 
         <!-- World List -->
         <activity
-            android:name="com.protolambda.blocktopograph.WorldItemListActivity"
+            android:name="com.protolambda.blocktopograph.worldlist.WorldItemListActivity"
             android:label="@string/title_worlditem_list"
             android:parentActivityName="com.protolambda.blocktopograph.SplashScreen"
             android:theme="@style/AppTheme.NoActionBar">
@@ -37,11 +38,11 @@
         <activity
             android:name="com.protolambda.blocktopograph.worldlist.WorldItemDetailActivity"
             android:label="@string/title_worlditem_detail"
-            android:parentActivityName="com.protolambda.blocktopograph.WorldItemListActivity"
+            android:parentActivityName="com.protolambda.blocktopograph.worldlist.WorldItemListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.protolambda.blocktopograph.WorldItemListActivity" />
+                android:value="com.protolambda.blocktopograph.worldlist.WorldItemListActivity" />
         </activity>
 
         <!-- World -->
@@ -49,11 +50,11 @@
             android:name="com.protolambda.blocktopograph.WorldActivity"
             android:label="@string/title_activity_world"
             android:configChanges="orientation|screenSize"
-            android:parentActivityName="com.protolambda.blocktopograph.WorldItemListActivity"
+            android:parentActivityName="com.protolambda.blocktopograph.worldlist.WorldItemListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.protolambda.blocktopograph.WorldItemListActivity" />
+                android:value="com.protolambda.blocktopograph.worldlist.WorldItemListActivity" />
         </activity>
 
 

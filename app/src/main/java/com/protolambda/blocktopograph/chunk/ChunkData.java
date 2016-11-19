@@ -1,26 +1,22 @@
 package com.protolambda.blocktopograph.chunk;
 
 
+import com.protolambda.blocktopograph.WorldData;
+
+import java.io.IOException;
+
 public abstract class ChunkData {
 
     public final Chunk chunk;
 
-    public final byte subChunk;
 
-    public ChunkData(Chunk chunk, byte subChunk){
+
+    public ChunkData(Chunk chunk){
         this.chunk = chunk;
-        this.subChunk = subChunk;
     }
 
     public abstract void createEmpty();
 
-    public static class ChunkDataException extends Exception {
+    public abstract void write() throws IOException, WorldData.WorldDBException;
 
-        public final Exception wrapped;
-
-        public ChunkDataException(Exception e){
-            super("ChunkDataException! "+e.getMessage());
-            this.wrapped = e;
-        }
-    }
 }

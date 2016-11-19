@@ -9,5 +9,5 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context="WorldItemListActivity"
+    tools:context=".worldlist.WorldItemListActivity"
     tools:listitem="@layout/worlditem_list_content" />

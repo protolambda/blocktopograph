@@ -34,7 +34,7 @@
         Please make a backup of all your loved MCPE worlds in case of data-corruption!\n
         NOTE: Minecraft might not load a whole world because of a single corrupt chunk of NBT!\n
         \n
-            This app is built and tested for MCPE 0.16.x, 0.15.x, and 0.14.x\n
+            This app is built and tested for MCPE 1.0 (beta), 0.16.x, 0.15.x, and 0.14.x\n
             Older MCPE versions are not supported.\n
         \n
         \n
@@ -54,6 +54,9 @@
         &#8226; <a href="https://github.com/Mojang/leveldb-mcpe">leveldb-mcpe</a> \n
             with <a href="https://github.com/protolambda/android-leveldb">
                     android-leveldb, fork by protolambda</a> \n
+        \n
+        <i>Source code on GitHub:</i>\n
+        <a href="https://github.com/protolambda/blocktopograph">github.com/protolambda/blocktopograph</a> \n
 
     </string>
 
@@ -167,11 +170,15 @@
     <string name="error_could_not_open_world_details_lost_track_world">
         Error: could not open world details; lost track of world.</string>
     <string name="error_could_not_open_world">Error: could not open world.</string>
+
     <string name="no_level_data_available">no level-data available</string>
-    <string name="details_xWorld_yLastTimePlayed" formatted="false">
-        World name: <xliff:g id="world_name" example="My survival world">%1$s</xliff:g>\n
-        Last time played: <xliff:g id="last_time_played" example="20/1/2016 11:59 AM">%2$s</xliff:g>
-    </string>
+    <string name="worldlist_detail_world_name">World name:</string>
+    <string name="worldlist_detail_world_size">World size:</string>
+    <string name="worldlist_detail_gamemode">Game mode:</string>
+    <string name="worldlist_detail_last_played">Last play:</string>
+    <string name="worldlist_detail_world_seed">World seed:</string>
+    <string name="worldlist_detail_file_path">File path:</string>
+
     <string name="loading_world">Loading world…</string>
     <string name="x_is_invalid" formatted="false">
         \"<xliff:g id="something_invalid" example="something">%1$s</xliff:g>\" is invalid!</string>
@@ -217,18 +224,23 @@
         No data has changed, nothing to save.</string>
     <string name="confirm_nbt_editor_changes">
         Do you really want to save your changes?</string>
-    <string name="coordinates_xy_dimension" formatted="false">
-        Player at:
-        (<xliff:g id="x_coordinate" example="123.45">%1$d</xliff:g>;
-        <xliff:g id="y_coordinate" example="-123.987">%2$d</xliff:g>)
-        [<xliff:g id="dimension" example="Overworld">%3$s</xliff:g>].</string>
     <string name="failed_find_player">Failed to find player.</string>
     <string name="failed_find_spawn">Failed to find spawn.</string>
     <string name="go_to_a_marker_list">Go to a marker:</string>
-    <string name="player_at_xy" formatted="false">
-        <xliff:g id="player_name" example="Steve">%1$s</xliff:g> at:
+    <string name="player">Player</string>
+    <string name="spawn">Spawn</string>
+    <string name="something_at_xyz_dim_float" formatted="false">
+        <xliff:g id="something_name" example="Steve">%1$s</xliff:g> at:
+        (<xliff:g id="x_coordinate" example="123.45">%2$.2f</xliff:g>;
+        <xliff:g id="y_coordinate" example="42.122333">%3$.2f</xliff:g>;
+        <xliff:g id="z_coordinate" example="-123.987">%4$.2f</xliff:g>)
+        [<xliff:g id="dimension" example="Overworld">%5$s</xliff:g>].</string>
+    <string name="something_at_xyz_dim_int" formatted="false">
+        <xliff:g id="something_name" example="Steve">%1$s</xliff:g> at:
         (<xliff:g id="x_coordinate" example="123.45">%2$d</xliff:g>;
-        <xliff:g id="y_coordinate" example="-123.987">%3$d</xliff:g>).</string>
+        <xliff:g id="y_coordinate" example="42.122333">%3$d</xliff:g>;
+        <xliff:g id="z_coordinate" example="-123.987">%4$d</xliff:g>)
+        [<xliff:g id="dimension" example="Overworld">%5$s</xliff:g>].</string>
     <string name="no_map_available">No map available.</string>
     <string name="searching_for_players">Searching for players…</string>
     <string name="failed_to_retrieve_player_data">Failed to retrieve player data.</string>
@@ -237,4 +249,52 @@
     <string name="go_to_coordinate">Go to coordinate</string>
     <string name="teleported_player_to_xyz_dimension">Teleported the player to: </string>
     <string name="marker_is_not_removable">This marker is not meant to be removed!</string>
+    <string name="sub_chunk">Sub-chunk</string>
+    <string name="choose_subchunk">Choose a sub–chunk (0…255):</string>
+    <string name="filter_markers">Filter markers</string>
+    <string name="show_map">Show map</string>
+    <string name="select_world">Select world</string>
+    <string name="singleplayer_nbt">Singleplayer NBT</string>
+    <string name="multiplayer_nbt">Multiplayer NBT</string>
+    <string name="world_nbt">World NBT</string>
+    <string name="overworld">Overworld</string>
+    <string name="satellite">Satellite</string>
+    <string name="cave">Cave</string>
+    <string name="slime_chunks">Slime-chunks</string>
+    <string name="heightmap">Heightmap</string>
+    <string name="biomes">Biomes</string>
+    <string name="foliage_color">Foliage color</string>
+    <string name="x_ray">X-Ray</string>
+    <string name="light">Light</string>
+    <string name="nether">Nether</string>
+    <string name="map">Map</string>
+    <string name="the_end">The End</string>
+    <string name="map_options">Map options</string>
+    <string name="toggle_grid">Toggle grid</string>
+    <string name="toggle_markers">Toggle markers</string>
+    <string name="advanced_options">Advanced Options</string>
+    <!-- all these NBT options should not be translated;
+      these correspond with the internal data names within the save file -->
+    <string name="biomedata_nbt">BiomeData NBT</string>
+    <string name="overworld_nbt">Overworld NBT</string>
+    <string name="villages_nbt">Villages NBT</string>
+    <string name="portals_nbt">Portals NBT</string>
+    <string name="dimension0_nbt">dimension0 NBT</string>
+    <string name="dimension1_nbt">dimension1 NBT</string>
+    <string name="dimension2_nbt">dimension2 NBT</string>
+    <string name="autonomousentities_nbt">AutonomousEntities NBT</string>
+    <!-- End of NBT options -->
+    <string name="open_nbt_by_name">Open NBT by name</string>
+
+    <string name="gamemode_survival">Survival</string>
+    <string name="gamemode_creative">Creative</string>
+    <string name="gamemode_adventure">Adventure</string>
+    <string name="postion_2D_floats_with_chunkpos">
+        Pos: (<xliff:g id="x_coordinate" example="123.45">%1$.2f</xliff:g>;
+        <xliff:g id="z_coordinate" example="-123.987">%2$.2f</xliff:g>)
+        Chunk: (<xliff:g id="x_chunk" example="123">%3$d</xliff:g>;
+        <xliff:g id="z_chunk" example="-42">%4$d</xliff:g>)
+        [<xliff:g id="dimension" example="Overworld">%5$s</xliff:g>].</string>
+    <string name="action_teleport">Teleport!</string>
+
 </resources>

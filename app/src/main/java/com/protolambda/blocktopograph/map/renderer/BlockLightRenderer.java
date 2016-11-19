@@ -2,12 +2,12 @@ package com.protolambda.blocktopograph.map.renderer;
 
 import android.graphics.Bitmap;
 
+import com.protolambda.blocktopograph.Log;
+import com.protolambda.blocktopograph.chunk.Chunk;
 import com.protolambda.blocktopograph.chunk.ChunkData;
 import com.protolambda.blocktopograph.chunk.ChunkManager;
-import com.protolambda.blocktopograph.chunk.ChunkTag;
 import com.protolambda.blocktopograph.chunk.Version;
 import com.protolambda.blocktopograph.chunk.terrain.TerrainChunkData;
-import com.protolambda.blocktopograph.chunk.terrain.V0_9_TerrainChunkData;
 import com.protolambda.blocktopograph.map.Dimension;
 
 
@@ -16,7 +16,7 @@ public class BlockLightRenderer implements MapRenderer {
 
     /**
      * Render a single chunk to provided bitmap (bm)
-     * @param cm Chunkmanager, provides chunks, which provide chunk-data
+     * @param cm ChunkManager, provides chunks, which provide chunk-data
      * @param bm Bitmap to render to
      * @param dimension Mapped dimension
      * @param chunkX X chunk coordinate (x-block coord / Chunk.WIDTH)
@@ -30,27 +30,44 @@ public class BlockLightRenderer implements MapRenderer {
      * @param pW width (X) of one block in pixels
      * @param pL length (Z) of one block in pixels
      * @return bm is returned back
+     *
+     * @throws Version.VersionException when the version of the chunk is unsupported.
      */
-    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL) throws Version.VersionException, ChunkData.ChunkDataException {
+    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL) throws Version.VersionException {
 
-        TerrainChunkData data = cm.getChunk(chunkX, chunkZ).getTerrain((byte) 0);
-        if(data == null) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+        Chunk chunk = cm.getChunk(chunkX, chunkZ);
+        Version cVersion = chunk.getVersion();
+
+        if(cVersion == Version.ERROR) return MapType.ERROR.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
 
 
+        int x, y, z, subChunk, color, i, j, tX, tY;
 
-        int x, y, z, light, color, i, j, tX, tY;
+        //render width in blocks
+        int rW = eX - bX;
+        int[] light = new int[rW * (eZ - bZ)];
 
-        for (z = bZ, tY = pY ; z < eZ; z++, tY += pL) {
+        for(subChunk = 0; subChunk < cVersion.subChunks; subChunk++) {
+            TerrainChunkData data = chunk.getTerrain((byte) subChunk);
+            if (data == null || !data.loadTerrain()) break;
+
+            for (z = bZ; z < eZ; z++) {
+                for (x = bX; x < eX; x++) {
+                    for (y = 0; y < cVersion.subChunkHeight; y++) {
+                        light[(z * rW) + x] += data.getBlockLightValue(x, y, z) & 0xff;
+                    }
+                }
+            }
+        }
+
+        int l;
+        for (z = bZ, tY = pY; z < eZ; z++, tY += pL) {
             for (x = bX, tX = pX; x < eX; x++, tX += pW) {
 
-                light = 0;
-                for (y = 127; y >= 0; --y) {
-                   light += data.getBlockLightValue(x, y, z);
-                }
+                l = light[(z * rW) + x];
+                l = l < 0 ? 0 : ((l > 0xff) ? 0xff : l);
 
-                light = light < 0 ? 0 : ((light > 0xff) ? 0xff : light);
-
-                color = (light << 16) | (light << 8) | (light) | 0xff000000;
+                color = (l << 16) | (l << 8) | (l) | 0xff000000;
 
                 for(i = 0; i < pL; i++){
                     for(j = 0; j < pW; j++){
@@ -58,9 +75,11 @@ public class BlockLightRenderer implements MapRenderer {
                     }
                 }
 
-
             }
+
         }
+
+        if(subChunk == 0) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
 
         return bm;
     }

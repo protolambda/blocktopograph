@@ -2,7 +2,9 @@ package com.protolambda.blocktopograph;
 
 import android.os.Bundle;
 
+import android.view.ViewGroup;
 import com.protolambda.blocktopograph.chunk.ChunkData;
+import com.protolambda.blocktopograph.chunk.NBTChunkData;
 import com.protolambda.blocktopograph.map.Dimension;
 import com.protolambda.blocktopograph.map.marker.AbstractMarker;
 import com.protolambda.blocktopograph.map.renderer.MapType;
@@ -37,5 +39,5 @@ public interface WorldActivityInterface {
 
     void changeMapType(MapType mapType, Dimension dimension);
 
-    void openChunkNBTEditor(int chunkX, int chunkZ, ChunkData chunkData);
+    void openChunkNBTEditor(final int chunkX, final int chunkZ, final NBTChunkData nbtChunkData, final ViewGroup viewGroup);
 }

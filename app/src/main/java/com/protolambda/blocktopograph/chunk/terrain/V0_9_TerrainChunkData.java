@@ -1,5 +1,6 @@
 package com.protolambda.blocktopograph.chunk.terrain;
 
+import com.protolambda.blocktopograph.WorldData;
 import com.protolambda.blocktopograph.chunk.Chunk;
 import com.protolambda.blocktopograph.chunk.ChunkTag;
 
@@ -10,7 +11,7 @@ import java.nio.ByteBuffer;
 public class V0_9_TerrainChunkData extends TerrainChunkData {
 
 
-    public ByteBuffer buf;
+    public volatile ByteBuffer buf;
 
     public static final int chunkW = 16, chunkL = 16, chunkH = 128;
 
@@ -33,32 +34,33 @@ public class V0_9_TerrainChunkData extends TerrainChunkData {
     }
 
     @Override
-    public void write() throws ChunkDataException {
-        try {
-            this.chunk.worldData.writeChunkData(chunk.x, chunk.z, ChunkTag.V0_9_LEGACY_TERRAIN, chunk.dimension, subChunk, false, toByteArray());
-        } catch (Exception e){
-            throw new ChunkDataException(e);
-        }
+    public void write() throws IOException, WorldData.WorldDBException {
+        this.chunk.worldData.writeChunkData(chunk.x, chunk.z, ChunkTag.V0_9_LEGACY_TERRAIN, chunk.dimension, subChunk, false, toByteArray());
     }
 
-    public void softLoad() throws ChunkDataException {
+    @Override
+    public boolean loadTerrain(){
+        return tryLoad();
+    }
+
+    @Override
+    public boolean load2DData(){
+        return tryLoad();
+    }
+
+    public boolean tryLoad() {
         if(buf == null){
             try {
-                loadFromByteArray(this.chunk.worldData.getChunkData(chunk.x, chunk.z, ChunkTag.V0_9_LEGACY_TERRAIN, chunk.dimension, subChunk, false));
+                byte[] rawData = this.chunk.worldData.getChunkData(chunk.x, chunk.z, ChunkTag.V0_9_LEGACY_TERRAIN, chunk.dimension, subChunk, false);
+                if(rawData == null) return false;
+                this.buf = ByteBuffer.wrap(rawData);
+                return true;
             } catch (Exception e){
-                throw new ChunkDataException(e);
+                //data is not present
+                return false;
             }
         }
-    }
-
-    public void loadFromByteArray(byte[] rawData) throws IOException {
-
-        //empty chunk
-        if(rawData == null) return;
-
-        this.buf = ByteBuffer.wrap(rawData);
-
-        //Log.("rawData.length: " + rawData.length + " read: " + offset);
+        else return true;
     }
 
     public byte[] toByteArray() throws IOException {
@@ -117,16 +119,15 @@ public class V0_9_TerrainChunkData extends TerrainChunkData {
 
 
     @Override
-    public byte getBlockTypeId(int x, int y, int z) throws ChunkDataException {
+    public byte getBlockTypeId(int x, int y, int z) {
         if (x >= chunkW || y >= chunkH || z >= chunkL || x < 0 || y < 0 || z < 0) {
             return 0;
         }
-        softLoad();
         return buf.get(POS_BLOCK_IDS + getOffset(x, y, z));
     }
 
     @Override
-    public byte getBlockData(int x, int y, int z) throws ChunkDataException {
+    public byte getBlockData(int x, int y, int z) {
         if (x >= chunkW || y >= chunkH || z >= chunkL || x < 0 || y < 0 || z < 0) {
             return 0;
         }
@@ -136,7 +137,7 @@ public class V0_9_TerrainChunkData extends TerrainChunkData {
     }
 
     @Override
-    public byte getSkyLightValue(int x, int y, int z) throws ChunkDataException {
+    public byte getSkyLightValue(int x, int y, int z) {
         if (x >= chunkW || y >= chunkH || z >= chunkL || x < 0 || y < 0 || z < 0) {
             return 0;
         }
@@ -146,7 +147,7 @@ public class V0_9_TerrainChunkData extends TerrainChunkData {
     }
 
     @Override
-    public byte getBlockLightValue(int x, int y, int z) throws ChunkDataException {
+    public byte getBlockLightValue(int x, int y, int z) {
         if (x >= chunkW || y >= chunkH || z >= chunkL || x < 0 || y < 0 || z < 0) {
             return 0;
         }
@@ -159,7 +160,7 @@ public class V0_9_TerrainChunkData extends TerrainChunkData {
      * Sets a block type, and also set the corresponding dirty table entry and set the saving flag.
      */
     @Override
-    public void setBlockTypeId(int x, int y, int z, int type) throws ChunkDataException {
+    public void setBlockTypeId(int x, int y, int z, int type) {
         if (x >= chunkW || y >= chunkH || z >= chunkL || x < 0 || y < 0 || z < 0) {
             return;
         }
@@ -167,7 +168,7 @@ public class V0_9_TerrainChunkData extends TerrainChunkData {
     }
 
     @Override
-    public void setBlockData(int x, int y, int z, int newData) throws ChunkDataException {
+    public void setBlockData(int x, int y, int z, int newData) {
         if (x >= chunkW || y >= chunkH || z >= chunkL || x < 0 || y < 0 || z < 0) {
             return;
         }
@@ -181,83 +182,28 @@ public class V0_9_TerrainChunkData extends TerrainChunkData {
         }
     }
 
-
-    @Override
-    public int getHighestBlockYAt(int x, int z) throws ChunkDataException {
-        for (int y = 127; y >= 0; --y) {
-            if (getBlockTypeId(x & 15, y, z & 15) != 0) {
-                return y;
-            }
-        }
-        return 0;
-    }
-
-    @Override
-    public int getHighestBlockYUnderAt(int x, int z, int y) throws ChunkDataException {
-        if (y > 127) y = 127;
-
-        for (; y >= 0; --y) {
-            if (getBlockTypeId(x & 15, y, z & 15) != 0) {
-                return y;
-            }
-        }
-        return 0;
-    }
-
-    @Override
-    public int getCaveYUnderAt(int x, int z, int y) throws ChunkDataException {
-        if (y > 127) y = 127;
-
-        for (; y >= 0; --y) {
-            if (getBlockTypeId(x & 15, y, z & 15) == 0) {
-                return y;
-            }
-        }
-        return 0;
-    }
-
-    @Override
-    public int getSeaFloorYAt(int x, int z, int height) throws ChunkDataException {
-        int id;
-        for (int y = height; y >= 0; --y) {
-            id = getBlockTypeId(x & 15, y, z & 15);
-            if (id != 0 && id != 8 && id != 9) {
-                return y;
-            }
-        }
-        return 0;
-    }
-
     private int getOffset(int x, int y, int z) {
         return (x * chunkW + z) * chunkH + y;
     }
 
     @Override
-    public int getBiome(int x, int z) throws ChunkDataException {
-        int id = buf.get(POS_BIOME_DATA + (get2Di(x, z) * 4));
-        if (id < 0) id = 256 + id;
-        return id;
+    public byte getBiome(int x, int z) {
+        return buf.get(POS_BIOME_DATA + (get2Di(x, z) * 4));
     }
 
     @Override
-    public int getGrassR(int x, int z) throws ChunkDataException {
-        int r = buf.get(POS_BIOME_DATA + (get2Di(x, z) * 4) + 1);
-        if (r < 0) r = 256 + r;
-        return r;
+    public byte getGrassR(int x, int z) {
+        return buf.get(POS_BIOME_DATA + (get2Di(x, z) * 4) + 1);
     }
 
     @Override
-    public int getGrassG(int x, int z) throws ChunkDataException {
-        int g = buf.get(POS_BIOME_DATA + (get2Di(x, z) * 4) + 2);
-        if (g < 0) g = 256 + g;
-        return g;
+    public byte getGrassG(int x, int z) {
+        return buf.get(POS_BIOME_DATA + (get2Di(x, z) * 4) + 2);
     }
 
     @Override
-    public int getGrassB(int x, int z) throws ChunkDataException {
-        int b = buf.get(POS_BIOME_DATA + (get2Di(x, z) * 4) + 3);
-        if (b < 0) b = 256 + b;
-        return b;
+    public byte getGrassB(int x, int z) {
+        return buf.get(POS_BIOME_DATA + (get2Di(x, z) * 4) + 3);
     }
 
     private int get2Di(int x, int z) {
@@ -265,10 +211,8 @@ public class V0_9_TerrainChunkData extends TerrainChunkData {
     }
 
     @Override
-    public int getHeightMapValue(int x, int z) throws ChunkDataException {
-        int h = buf.get(POS_HEIGHTMAP + get2Di(x, z));
-        if (h < 0) h = 256 + h;
-        return h;
+    public int getHeightMapValue(int x, int z) {
+        return buf.get(POS_HEIGHTMAP + get2Di(x, z)) & 0xff;
     }
 
 }

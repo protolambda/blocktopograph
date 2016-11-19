@@ -38,7 +38,7 @@ public enum Version {
         //`data` is supposed to be one byte,
         // but it might grow to contain more data later on, or larger version ids.
         // Looking up the first byte is sufficient for now.
-        return data.length > 0 ? versionMap.get(data[0] & 0xff) : NULL;
+        return data != null && data.length > 0 ? versionMap.get(data[0] & 0xff) : NULL;
     }
 
     public TerrainChunkData createTerrainChunkData(Chunk chunk, byte subChunk) throws VersionException {
@@ -58,35 +58,29 @@ public enum Version {
         }
     }
 
-    public NBTChunkData createEntityChunkData(Chunk chunk, byte subChunk) throws VersionException {
+    public NBTChunkData createEntityChunkData(Chunk chunk) throws VersionException {
         switch (this){
             case ERROR:
             case NULL:
                 return null;
             case OLD_LIMITED:
                 throw new VersionException("Handling terrain chunk data is NOT supported for this version!", this);
-            case v0_9:
-            case V1_0:
-                return new NBTChunkData(chunk, subChunk, ChunkTag.ENTITY);
             default:
                 //use the latest version, like nothing will ever happen...
-                return new NBTChunkData(chunk, subChunk, ChunkTag.ENTITY);
+                return new NBTChunkData(chunk, ChunkTag.ENTITY);
         }
     }
 
-    public NBTChunkData createBlockEntityChunkData(Chunk chunk, byte subChunk) throws VersionException {
+    public NBTChunkData createBlockEntityChunkData(Chunk chunk) throws VersionException {
         switch (this){
             case ERROR:
             case NULL:
                 return null;
             case OLD_LIMITED:
                 throw new VersionException("Handling terrain chunk data is NOT supported for this version!", this);
-            case v0_9:
-            case V1_0:
-                return new NBTChunkData(chunk, subChunk, ChunkTag.BLOCK_ENTITY);
             default:
                 //use the latest version, like nothing will ever happen...
-                return new NBTChunkData(chunk, subChunk, ChunkTag.BLOCK_ENTITY);
+                return new NBTChunkData(chunk, ChunkTag.BLOCK_ENTITY);
         }
     }
 

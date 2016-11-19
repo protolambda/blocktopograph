@@ -10,7 +10,6 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 
 import com.protolambda.blocktopograph.WorldActivityInterface;
-import com.protolambda.blocktopograph.chunk.Chunk;
 import com.protolambda.blocktopograph.chunk.ChunkManager;
 import com.protolambda.blocktopograph.map.renderer.MapType;
 import com.qozix.tileview.graphics.BitmapProvider;
@@ -140,25 +139,31 @@ public class MCTileProvider implements BitmapProvider {
 
                     for(x = minChunkX, pX = 0; x < maxChunkX; x++, pX += pixelsPerChunkW){
 
-                        mapType.renderer.renderToBitmap(cm, bm, dimension,
-                                x, z,
-                                0, 0,
-                                dimension.chunkW, dimension.chunkL,
-                                pX, pY,
-                                pixelsPerBlockW, pixelsPerBlockL);
+                        try {
+                            mapType.renderer.renderToBitmap(cm, bm, dimension,
+                                    x, z,
+                                    0, 0,
+                                    dimension.chunkW, dimension.chunkL,
+                                    pX, pY,
+                                    pixelsPerBlockW, pixelsPerBlockL);
+                        } catch (Exception e){
+                            MapType.ERROR.renderer.renderToBitmap(cm, bm, dimension,
+                                    x, z,
+                                    0, 0,
+                                    dimension.chunkW, dimension.chunkL,
+                                    pX, pY,
+                                    pixelsPerBlockW, pixelsPerBlockL);
+                            e.printStackTrace();
+                        }
 
                     }
                 }
             }
 
 
-            //get that memory back!
-            cm.disposeAll();
-
-
             //load all those markers with an async task, this task publishes its progress,
             // the UI thread picks it up and renders the markers
-            new MarkerAsyncTask(worldProvider, minChunkX, minChunkZ, maxChunkX, maxChunkZ).execute();
+            new MarkerAsyncTask(worldProvider, cm, minChunkX, minChunkZ, maxChunkX, maxChunkZ).execute();
 
 
             //draw the grid

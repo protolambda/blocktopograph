@@ -5,36 +5,49 @@ import com.qozix.tileview.detail.DetailLevelManager;
 
 public enum MapType implements DetailLevelManager.LevelType {
 
-    //just the surface of the world, with shading for height diff
-    SATELLITE(new SatelliteRenderer()),
-
-    //cave mapping
-    CAVE(new CaveRenderer()),
-
-    SLIME_CHUNK(new SlimeChunkRenderer()),
+    //shows that a chunk was present, but couldn't be renderer
+    ERROR(new ChessPatternRenderer(0xFF2B0000, 0xFF580000)),
 
     //simple xor pattern renderer
     DEBUG(new DebugRenderer()),
 
     //simple chess pattern renderer
-    CHESS(new ChessPatternRenderer()),
+    CHESS(new ChessPatternRenderer(0xFF2B2B2B, 0xFF585858)),
+
+    //just the surface of the world, with shading for height diff
+    OVERWORLD_SATELLITE(new SatelliteRenderer()),
+
+    //cave mapping
+    OVERWORLD_CAVE(new CaveRenderer()),
+
+    OVERWORLD_SLIME_CHUNK(new SlimeChunkRenderer()),
 
     //render skylight value of highest block
-    HEIGHTMAP(new HeightmapRenderer()),
+    OVERWORLD_HEIGHTMAP(new HeightmapRenderer()),
 
     //render biome id as biome-unique color
-    BIOME(new BiomeRenderer()),
+    OVERWORLD_BIOME(new BiomeRenderer()),
 
     //render the voliage colors
-    GRASS(new GrassRenderer()),
+    OVERWORLD_GRASS(new GrassRenderer()),
 
     //render only the valuable blocks to mine (diamonds, emeralds, gold, etc.)
-    XRAY(new XRayRenderer()),
+    OVERWORLD_XRAY(new XRayRenderer()),
 
     //block-light renderer: from light-sources like torches etc.
-    BLOCK_LIGHT(new BlockLightRenderer()),
+    OVERWORLD_BLOCK_LIGHT(new BlockLightRenderer()),
 
-    NETHER(new NetherRenderer());
+    NETHER(new NetherRenderer()),
+
+    NETHER_XRAY(new XRayRenderer()),
+
+    NETHER_BLOCK_LIGHT(new BlockLightRenderer()),
+
+    END_SATELLITE(new SatelliteRenderer()),
+
+    END_HEIGHTMAP(new HeightmapRenderer()),
+
+    END_BLOCK_LIGHT(new BlockLightRenderer());
 
     //REDSTONE //TODO redstone circuit mapping
     //TRAFFIC //TODO traffic mapping (land = green, water = blue, gravel/stone/etc. = gray, rails = yellow)

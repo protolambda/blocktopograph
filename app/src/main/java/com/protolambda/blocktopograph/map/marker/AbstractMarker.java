@@ -1,27 +1,29 @@
 package com.protolambda.blocktopograph.map.marker;
 
 import android.content.Context;
-import android.view.View;
+import android.support.annotation.NonNull;
 import android.widget.ImageView;
 
 import com.protolambda.blocktopograph.map.Dimension;
+import com.protolambda.blocktopograph.util.NamedBitmapProvider;
+import com.protolambda.blocktopograph.util.NamedBitmapProviderHandle;
+import com.protolambda.blocktopograph.util.math.Vector3;
 
-public abstract class AbstractMarker {
+public class AbstractMarker implements NamedBitmapProviderHandle {
 
     public final int x, y, z;
     public final Dimension dimension;
-    public final String iconName;
-    public final String displayName;
+
+    public final NamedBitmapProvider namedBitmapProvider;
 
     public final boolean isCustom;
 
-    public AbstractMarker(int x, int y, int z, Dimension dimension, String iconName, String displayName, boolean isCustom) {
+    public AbstractMarker(int x, int y, int z, Dimension dimension, NamedBitmapProvider namedBitmapProvider, boolean isCustom) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.dimension = dimension;
-        this.iconName = iconName;
-        this.displayName = displayName;
+        this.namedBitmapProvider = namedBitmapProvider;
         this.isCustom = isCustom;
     }
 
@@ -38,13 +40,27 @@ public abstract class AbstractMarker {
     public MarkerImageView getView(Context context) {
         if(view != null) return view;
         view = new MarkerImageView(context, this);
-        this.loadIcon(view, false);
+        this.loadIcon(view);
         return view;
     }
 
-    public abstract void loadIcon(ImageView iconView, boolean dark);
+    /**
+     * Loads the provided bitmap into the image view.
+     * @param iconView The view to load the icon into.
+     */
+    public void loadIcon(ImageView iconView) {
+        iconView.setImageBitmap(this.getNamedBitmapProvider().getBitmap());
+    }
 
-    public abstract AbstractMarker copy(int x, int y, int z, Dimension dimension);
+    @NonNull
+    @Override
+    public NamedBitmapProvider getNamedBitmapProvider() {
+        return namedBitmapProvider;
+    }
+
+    public AbstractMarker copy(int x, int y, int z, Dimension dimension) {
+        return new AbstractMarker(x, y, z, dimension, this.namedBitmapProvider, this.isCustom);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -57,21 +73,17 @@ public abstract class AbstractMarker {
             && y == that.y
             && z == that.z
             && dimension == that.dimension
-            && (iconName != null
-                ? iconName.equals(that.iconName) : that.iconName == null)
-            && (displayName != null
-                ? displayName.equals(that.displayName) : that.displayName == null);
+            && (namedBitmapProvider != null
+                ? namedBitmapProvider.equals(that.namedBitmapProvider)
+                : that.namedBitmapProvider == null);
 
     }
 
     @Override
     public int hashCode() {
-        int result = x;
-        result = 31 * result + y;
-        result = 31 * result + z;
+        int result = Vector3.intHash(x, y, z);
         result = 31 * result + (dimension != null ? dimension.hashCode() : 0);
-        result = 31 * result + (iconName != null ? iconName.hashCode() : 0);
-        result = 31 * result + (displayName != null ? displayName.hashCode() : 0);
+        result = 31 * result + (namedBitmapProvider != null ? namedBitmapProvider.hashCode() : 0);
         return result;
     }
 }

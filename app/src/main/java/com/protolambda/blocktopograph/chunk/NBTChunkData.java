@@ -1,5 +1,6 @@
 package com.protolambda.blocktopograph.chunk;
 
+import com.protolambda.blocktopograph.WorldData;
 import com.protolambda.blocktopograph.nbt.convert.DataConverter;
 import com.protolambda.blocktopograph.nbt.tags.IntTag;
 import com.protolambda.blocktopograph.nbt.tags.Tag;
@@ -15,18 +16,23 @@ public class NBTChunkData extends ChunkData {
 
     public final ChunkTag dataType;
 
-    public NBTChunkData(Chunk chunk, byte subChunk, ChunkTag dataType) {
-        super(chunk, subChunk);
+    public NBTChunkData(Chunk chunk, ChunkTag dataType) {
+        super(chunk);
         this.dataType = dataType;
+    }
+
+    public void load() throws WorldData.WorldDBLoadException, WorldData.WorldDBException, IOException {
+        loadFromByteArray(chunk.worldData.getChunkData(chunk.x, chunk.z, dataType, this.chunk.dimension, (byte) 0, false));
     }
 
     public void loadFromByteArray(byte[] data) throws IOException {
         if (data != null && data.length > 0) this.tags = DataConverter.read(data);
     }
 
-    public byte[] toByteArray() throws IOException {
+    public void write() throws WorldData.WorldDBException, IOException {
         if (this.tags == null) this.tags = new ArrayList<>();
-        return DataConverter.write(this.tags);
+        byte[] data = DataConverter.write(this.tags);
+        this.chunk.worldData.writeChunkData(this.chunk.x, this.chunk.z, this.dataType, this.chunk.dimension, (byte) 0, false, data);
     }
 
     @Override

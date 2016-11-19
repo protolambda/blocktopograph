@@ -5,10 +5,8 @@ import android.util.LongSparseArray;
 import com.protolambda.blocktopograph.Log;
 import com.protolambda.blocktopograph.chunk.ChunkManager;
 import com.protolambda.blocktopograph.map.marker.AbstractMarker;
-import com.protolambda.blocktopograph.map.marker.BlockMarker;
-import com.protolambda.blocktopograph.map.marker.EntityMarker;
-import com.protolambda.blocktopograph.map.marker.IconMarker;
-import com.protolambda.blocktopograph.map.marker.TileEntityMarker;
+import com.protolambda.blocktopograph.map.marker.CustomNamedBitmapProvider;
+import com.protolambda.blocktopograph.util.NamedBitmapProvider;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -38,7 +36,6 @@ public class MarkerManager {
         TODO marker stuff:
         - add more marker-icons/types
         - player markers with name-tags
-        - view with list of filtered markers (filter on entity-type, tile-entity-type, custom-type, etc.)
 
          */
 
@@ -171,8 +168,8 @@ public class MarkerManager {
 
             for(AbstractMarker marker : markers){
                 out.format("1 \"%s\", \"%s\", %d %d %d %s ;\n",
-                        marker.displayName.replace("\"", "\\\""),
-                        marker.iconName.replace("\"", "\\\""),
+                        marker.getNamedBitmapProvider().getBitmapDisplayName().replace("\"", "\\\""),
+                        marker.getNamedBitmapProvider().getBitmapDataName().replace("\"", "\\\""),
                         marker.x, marker.y, marker.z,
                         marker.dimension.dataName.replace("\"", "\\\""));
             }
@@ -195,18 +192,15 @@ public class MarkerManager {
     }
 
     public static AbstractMarker markerFromData(String displayName, String iconName, int x, int y, int z, Dimension dimension){
-        Block b = Block.getByDataName(iconName);
-        if(b != null && b.bitmap != null) return new BlockMarker(x, y, z, dimension, displayName, b, true);
 
-        Entity e = Entity.getEntity(iconName);
-        if(e != null && e.bitmap != null) return new EntityMarker(x, y, z, dimension, displayName, e, true);
+        NamedBitmapProvider nbp = Block.getByDataName(iconName);
+        if(nbp == null || nbp.getBitmap() == null) nbp = Entity.getEntity(iconName);
+        if(nbp == null || nbp.getBitmap() == null) nbp = TileEntity.getTileEntity(iconName);
+        if(nbp == null || nbp.getBitmap() == null) nbp = CustomIcon.getCustomIcon(iconName);
+        if(nbp == null || nbp.getBitmap() == null) nbp = CustomIcon.DEFAULT_MARKER;
 
-        TileEntity te = TileEntity.getTileEntity(iconName);
-        if(te != null && te.getBitmap() != null) return new TileEntityMarker(x, y, z, dimension, displayName, te, true);
-
-        CustomIcon icon = CustomIcon.getCustomIcon(iconName);
-        if(icon == null) icon = CustomIcon.DEFAULT_MARKER;
-        return new IconMarker(x, y, z, dimension, displayName, icon, true);
+        return new AbstractMarker(x, y, z, dimension,
+            new CustomNamedBitmapProvider(nbp, displayName), true);
 
     }
 }

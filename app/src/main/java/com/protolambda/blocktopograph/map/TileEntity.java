@@ -1,14 +1,23 @@
 package com.protolambda.blocktopograph.map;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+
+import com.protolambda.blocktopograph.util.NamedBitmapProvider;
+import com.protolambda.blocktopograph.util.NamedBitmapProviderHandle;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
-public enum TileEntity {
+public enum TileEntity implements NamedBitmapProviderHandle, NamedBitmapProvider {
 
-    CHEST(0, "Chest", "Chest", Block.B_54_0_CHEST);
+    CHEST(0, "Chest", "Chest", Block.B_54_0_CHEST),
+    TRAPPED_CHEST(1, "Trapped Chest", "TrappedChest", Block.B_146_0_TRAPPED_CHEST),
+    ENDER_CHEST(2, "Ender Chest", "EnderChest", Block.B_130_0_ENDER_CHEST),
+    MOB_SPAWNER(3, "Mob Spawner", "MobSpawner", Block.B_52_0_MOB_SPAWNER),
+    END_PORTAL(4, "End Portal", "EndPortal", Block.B_119_0_END_PORTAL),
+    BEACON(5, "Beacon", "Beacon", Block.B_138_0_BEACON);
 
 
     public final int id;
@@ -23,8 +32,27 @@ public enum TileEntity {
         this.block = block;
     }
 
+    @Override
     public Bitmap getBitmap(){
         return block.bitmap;
+    }
+
+    @NonNull
+    @Override
+    public NamedBitmapProvider getNamedBitmapProvider(){
+        return this;
+    }
+
+    @NonNull
+    @Override
+    public String getBitmapDisplayName(){
+        return this.displayName;
+    }
+
+    @NonNull
+    @Override
+    public String getBitmapDataName() {
+        return this.dataName;
     }
 
     private static final Map<String, TileEntity> tileEntityMap;

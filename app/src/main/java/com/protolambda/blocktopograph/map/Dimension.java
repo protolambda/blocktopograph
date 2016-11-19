@@ -8,9 +8,9 @@ import java.util.Map;
 
 public enum Dimension {
 
-    OVERWORLD(0, "overworld", "Overworld", 16, 16, 128, 1, MapType.SATELLITE),
+    OVERWORLD(0, "overworld", "Overworld", 16, 16, 128, 1, MapType.OVERWORLD_SATELLITE),
     NETHER(1, "nether", "Nether", 16, 16, 128, 8, MapType.NETHER),
-    END(2, "end", "End", 16, 16, 128, 1, MapType.SATELLITE);//mcpe: SOON^TM /jk
+    END(2, "end", "End", 16, 16, 128, 1, MapType.END_SATELLITE);//mcpe: SOON^TM /jk
 
     public final int id;
     public final int chunkW, chunkL, chunkH;

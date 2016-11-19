@@ -22,8 +22,7 @@ import java.util.TimeZone;
 import com.protolambda.blocktopograph.R;
 import com.protolambda.blocktopograph.World;
 import com.protolambda.blocktopograph.WorldActivity;
-import com.protolambda.blocktopograph.WorldItemListActivity;
-import com.protolambda.blocktopograph.nbt.tags.LongTag;
+import com.protolambda.blocktopograph.util.io.IOUtil;
 
 /**
  * A fragment representing a single WorldItem detail screen.
@@ -84,18 +83,29 @@ public class WorldItemDetailFragment extends Fragment {
         }
 
 
-
         View rootView = inflater.inflate(R.layout.worlditem_detail, container, false);
 
-        if (world != null) {
-            String detailText = activity.getString(R.string.no_level_data_available);
-            try {
-                if (world.level != null)
-                    detailText = String.format(activity.getString(R.string.details_xWorld_yLastTimePlayed), world.getWorldDisplayName(), getDate(((LongTag) world.level.getChildTagByKey("LastPlayed")).getValue()));
-            } catch (Exception e){
-                e.printStackTrace();
+        try {
+            if (world != null && world.level != null){
+                TextView worldName = (TextView) rootView.findViewById(R.id.detail_world_name);
+                worldName.setText(world.getWorldDisplayName());
+                TextView worldSize = (TextView) rootView.findViewById(R.id.detail_world_size);
+                worldSize.setText(IOUtil.getFileSizeInText(world.worldFolder));
+
+                TextView worldGameMode = (TextView) rootView.findViewById(R.id.detail_world_gamemode);
+                worldGameMode.setText(WorldListUtil.getWorldGamemodeText(activity, world));
+
+                TextView lastPlayed = (TextView) rootView.findViewById(R.id.detail_last_played);
+                lastPlayed.setText(WorldListUtil.getLastPlayedText(activity, world));
+
+                TextView worldSeed = (TextView) rootView.findViewById(R.id.detail_world_seed);
+                worldSeed.setText(String.valueOf(world.getWorldSeed()));
+
+                TextView worldPath = (TextView) rootView.findViewById(R.id.detail_world_path);
+                worldPath.setText(world.levelFile.getAbsolutePath());
             }
-            ((TextView) rootView.findViewById(R.id.worlditem_detail)).setText(detailText);
+        } catch (Exception e){
+            e.printStackTrace();
         }
 
 
@@ -114,11 +124,10 @@ public class WorldItemDetailFragment extends Fragment {
                 context.startActivity(intent);
             }
         });
-/*
-// Debug button to write small worlds in an easily readable format
-    WARNING: DO NOT USE ON LARGE WORLDS (The debug output will get way larger than the world!)
 
-
+        // Debug button to write small worlds in an easily readable format
+        // WARNING: DO NOT USE ON LARGE WORLDS (The debug output will get way larger than the world!)
+        /*
         FloatingActionButton fabDevMode = (FloatingActionButton) rootView.findViewById(R.id.fab_dev_mode);
         assert fabDevMode != null;
         fabDevMode.setOnClickListener(new View.OnClickListener() {
@@ -127,7 +136,7 @@ public class WorldItemDetailFragment extends Fragment {
                 Snackbar.make(view, "Outputting world...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
-                World.WorldData wData = world.getWorldData();
+                WorldData wData = world.getWorldData();
 
 
 
@@ -151,12 +160,12 @@ public class WorldItemDetailFragment extends Fragment {
                         buf.newLine();
                         buf.write("key: " + new String(key));
                         buf.newLine();
-                        buf.write("key in Hex: " + World.WorldData.bytesToHex(key, 0, key.length));
+                        buf.write("key in Hex: " + WorldData.bytesToHex(key, 0, key.length));
                         buf.newLine();
                         buf.write("------------------------");
                         buf.newLine();
                         for(int i =0; i < value.length; i += 256){
-                            buf.write(World.WorldData.bytesToHex(value, i, Math.min(i + 256, value.length)));
+                            buf.write(WorldData.bytesToHex(value, i, Math.min(i + 256, value.length)));
                             buf.newLine();
                         }
 
@@ -176,8 +185,8 @@ public class WorldItemDetailFragment extends Fragment {
                         .setAction("Action", null).show();
 
             }
-        });
-*/
+        });*/
+
         return rootView;
     }
 }

@@ -25,4 +25,18 @@ public class TextFile {
         }
         return text.toString();
     }
+
+    public static String readTextFileFirstLine(File txtFile){
+        String text = null;
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader(txtFile));
+            text = br.readLine();
+            br.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return text;
+    }
 }

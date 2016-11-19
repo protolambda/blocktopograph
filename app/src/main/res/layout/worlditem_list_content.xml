@@ -3,9 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:padding="8dp"
     android:orientation="horizontal">
 
     <ImageView
+        android:layout_margin="8dp"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
@@ -15,38 +17,77 @@
         android:id="@+id/icon"
         android:layout_alignParentLeft="true" />
 
-    <TextView
-        android:id="@+id/world_name"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:layout_margin="0dp"
+        android:paddingTop="0dp"
         android:layout_toEndOf="@+id/icon"
-        android:layout_marginStart="32dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="32dp"
-        android:textStyle="bold"
-        tools:text="worldName"
-        android:layout_toRightOf="@+id/icon"
-        android:layout_marginLeft="32dp" />
+        android:layout_toRightOf="@+id/icon">
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:textAppearance="?attr/textAppearanceListItem"
-        tools:text="/storage/emulated/0/games/com.mojang/minecraftWorlds/xBgAAAnsAQA=/level.dat"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:paddingTop="5dp"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/world_name"
-        android:layout_alignStart="@+id/world_name"
-        android:layout_alignTop="@+id/world_name"
-        android:textStyle="italic"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignLeft="@+id/world_name" />
+        <TextView
+            android:id="@+id/world_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            tools:text="worldName"
+            />
+
+
+        <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/world_size"
+                android:layout_margin="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                tools:text="0.5MB"/>
+            <TextView
+                android:id="@+id/world_gamemode"
+                android:layout_toEndOf="@+id/world_size"
+                android:layout_toRightOf="@+id/world_size"
+                android:layout_margin="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                tools:text="Creative"/>
+            <TextView
+                android:layout_toEndOf="@+id/world_gamemode"
+                android:layout_toRightOf="@+id/world_gamemode"
+                android:id="@+id/world_last_played"
+                android:layout_margin="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                tools:text="01/02/1234"/>
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/world_path"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            tools:text="/storage/emulated/0/games/com.mojang/minecraftWorlds/xBgAAAnsAQA=/level.dat"
+            android:textColor="#555"
+            android:textSize="@dimen/labels_text_size"
+            android:textStyle="italic"/>
+
+    </LinearLayout>
+
+
+
+
 </RelativeLayout>

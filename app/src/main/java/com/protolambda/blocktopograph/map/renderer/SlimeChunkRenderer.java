@@ -2,7 +2,6 @@ package com.protolambda.blocktopograph.map.renderer;
 
 import android.graphics.Bitmap;
 
-import com.protolambda.blocktopograph.chunk.ChunkData;
 import com.protolambda.blocktopograph.chunk.ChunkManager;
 import com.protolambda.blocktopograph.chunk.Version;
 import com.protolambda.blocktopograph.map.Dimension;
@@ -14,7 +13,7 @@ public class SlimeChunkRenderer implements MapRenderer {
 
     /**
      * Render a single chunk to provided bitmap (bm)
-     * @param cm Chunkmanager, provides chunks, which provide chunk-data
+     * @param cm ChunkManager, provides chunks, which provide chunk-data
      * @param bm Bitmap to render to
      * @param dimension Mapped dimension
      * @param chunkX X chunk coordinate (x-block coord / Chunk.WIDTH)
@@ -28,12 +27,14 @@ public class SlimeChunkRenderer implements MapRenderer {
      * @param pW width (X) of one block in pixels
      * @param pL length (Z) of one block in pixels
      * @return bm is returned back
+     *
+     * @throws Version.VersionException when the version of the chunk is unsupported.
      */
-    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL) throws Version.VersionException, ChunkData.ChunkDataException {
+    public Bitmap renderToBitmap(ChunkManager cm, Bitmap bm, Dimension dimension, int chunkX, int chunkZ, int bX, int bZ, int eX, int eZ, int pX, int pY, int pW, int pL) throws Version.VersionException {
 
         int x, z, i, j, tX, tY;
 
-        MapType.SATELLITE.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+        MapType.OVERWORLD_SATELLITE.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
 
         boolean isSlimeChunk = isSlimeChunk(chunkX, chunkZ);
         int color, r, g, b, avg;
