@@ -227,11 +227,13 @@ public class EditorFragment extends Fragment {
                         public void afterTextChanged(Editable s) {
                             String sValue = s.toString();
                             try {
-                                byteTag.setValue(Byte.valueOf(sValue));
+                                int value = Integer.parseInt(sValue);
+                                if(value < 0 || value > 0xff)
+                                    throw new NumberFormatException("No unsigned byte.");
+                                byteTag.setValue((byte) value);
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
+                                editText.setError(String.format(context.getString(R.string.x_is_invalid), sValue));
                             }
                         }
                     });
@@ -255,8 +257,7 @@ public class EditorFragment extends Fragment {
                                 shortTag.setValue(Short.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
+                                editText.setError(String.format(context.getString(R.string.x_is_invalid), sValue));
                             }
                         }
                     });
@@ -280,8 +281,7 @@ public class EditorFragment extends Fragment {
                                 intTag.setValue(Integer.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
+                                editText.setError(String.format(context.getString(R.string.x_is_invalid), sValue));
                             }
                         }
                     });
@@ -305,8 +305,7 @@ public class EditorFragment extends Fragment {
                                 longTag.setValue(Long.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText,  String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
+                                editText.setError(String.format(context.getString(R.string.x_is_invalid), sValue));
                             }
                         }
                     });
@@ -330,8 +329,7 @@ public class EditorFragment extends Fragment {
                                 floatTag.setValue(Float.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
+                                editText.setError(String.format(context.getString(R.string.x_is_invalid), sValue));
                             }
                         }
                     });
@@ -355,8 +353,7 @@ public class EditorFragment extends Fragment {
                                 doubleTag.setValue(Double.valueOf(sValue));
                                 nbt.setModified();
                             } catch (NumberFormatException e){
-                                Snackbar.make(editText, String.format(context.getString(R.string.x_is_invalid), sValue), Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
+                                editText.setError(String.format(context.getString(R.string.x_is_invalid), sValue));
                             }
                         }
                     });
