@@ -490,7 +490,7 @@ public class WorldActivity extends AppCompatActivity
                 changeContentFragment(new OpenFragmentCallback() {
                     @Override
                     public void onOpen() {
-                        openSpecialDBEntry(World.SpecialDBEntryType.PORTALS);
+                        openSpecialDBEntry(World.SpecialDBEntryType.DIMENSION_0);
                     }
                 });
                 break;
@@ -498,7 +498,7 @@ public class WorldActivity extends AppCompatActivity
                 changeContentFragment(new OpenFragmentCallback() {
                     @Override
                     public void onOpen() {
-                        openSpecialDBEntry(World.SpecialDBEntryType.PORTALS);
+                        openSpecialDBEntry(World.SpecialDBEntryType.DIMENSION_1);
                     }
                 });
                 break;
@@ -506,7 +506,7 @@ public class WorldActivity extends AppCompatActivity
                 changeContentFragment(new OpenFragmentCallback() {
                     @Override
                     public void onOpen() {
-                        openSpecialDBEntry(World.SpecialDBEntryType.PORTALS);
+                        openSpecialDBEntry(World.SpecialDBEntryType.DIMENSION_2);
                     }
                 });
                 break;
@@ -514,7 +514,7 @@ public class WorldActivity extends AppCompatActivity
                 changeContentFragment(new OpenFragmentCallback() {
                     @Override
                     public void onOpen() {
-                        openSpecialDBEntry(World.SpecialDBEntryType.PORTALS);
+                        openSpecialDBEntry(World.SpecialDBEntryType.AUTONOMOUS_ENTITIES);
                     }
                 });
                 break;
@@ -690,7 +690,11 @@ public class WorldActivity extends AppCompatActivity
     public void openSpecialDBEntry(final World.SpecialDBEntryType entryType){
         try {
             EditableNBT editableEntry = openSpecialEditableNbtDbEntry(entryType);
-            if(editableEntry == null) throw new Exception("\"" + entryType.keyName + "\" not found in DB.");
+            if(editableEntry == null){
+                this.openWorldMap();
+                //TODO better handling of db problems
+                //throw new Exception("\"" + entryType.keyName + "\" not found in DB.");
+            }
 
             Log.i("Opening NBT editor for \"" + entryType.keyName + "\" from world database.");
 
