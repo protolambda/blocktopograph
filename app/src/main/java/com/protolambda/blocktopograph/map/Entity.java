@@ -60,7 +60,7 @@ public enum Entity implements NamedBitmapProviderHandle, NamedBitmapProvider {
     SKELETON_WITHER(48, "Wither Skeleton", new String[]{ "Skeleton", "WitherSkeleton" }, "wither", 61),
     GUARDIAN(49, "Guardian", new String[]{ "Guardian" }, "guardian", 87),
     ELDER_GAURDIAN(50, "Elder Gaurdian", new String[]{ "ElderGaurdian" }, "elder-gaurdian", 88),
-    NPC(51, "Npc", new String[]{ "Npc" }, "npc", 100),
+    NPC(51, "NPC", new String[]{ "Npc" }, "npc", 100),
     WITHER_BOSS(52, "Wither Boss", new String[]{ "WitherBoss" }, "blue-wither-skull", 72),
     ENDER_DRAGON(53, "Ender Dragon", new String[]{ "EnderDragon" }, "ender-dragon", 29),
     SHULKER(54, "Shulker", new String[]{ "Shulker" }, "shulker", 30),
@@ -111,6 +111,7 @@ public enum Entity implements NamedBitmapProviderHandle, NamedBitmapProvider {
     MINECART_CHEST(98, "Storage Minecart", new String[]{ "MinecartChest" }, "minecart-chest", 35),
     LINGERING_POTION(101, "Lingering potion", new String[]{ "LingeringPotion" }, "lingering-potion", 144),
 
+    //id 900+ is ignored for functions like map-filtering, these are placeholders for when the game adds more expected features.
     MINECART_SPAWNER(900, "Minecart with Spawner", new String[]{ "MinecartSpawner" }, "minecart-with-spawner", 71),//99 ; MinecartSpawner is not yet in the game
     MINECART_COMMAND_BLOCK(901, "Minecart with Command Block", new String[]{ "MinecartCommandBlock" }, "minecart-with-command-block", 78),//100 ; MinecartCommandBlock is not yet in the game
     MINECART_FURNACE(902, "Powered Minecart", new String[]{ "MinecartFurnace" }, "minecart-furnace", 36),//101 ; MinecartFurnace is not yet in the game

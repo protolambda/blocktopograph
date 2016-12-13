@@ -1437,7 +1437,9 @@ public class MapFragment extends Fragment {
     static {
         //entities are enabled by default
         for (Entity v : Entity.values()) {
-            if(v.sheetPos < 0) continue;//skip things without a bitmap (dropped items etc.)
+            //skip things without a bitmap (dropped items etc.)
+            //skip entities with placeholder ids (900+)
+            if(v.sheetPos < 0 || v.id >= 900) continue;
             markerFilter.put(v.getNamedBitmapProvider(),
                     new BitmapChoiceListAdapter.NamedBitmapChoice(v, true));
         }
