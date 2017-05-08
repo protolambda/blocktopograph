@@ -3,13 +3,12 @@ package com.protolambda.blocktopograph.chunk.terrain;
 import com.protolambda.blocktopograph.WorldData;
 import com.protolambda.blocktopograph.chunk.Chunk;
 import com.protolambda.blocktopograph.chunk.ChunkTag;
-import com.protolambda.blocktopograph.chunk.Version;
 import com.protolambda.blocktopograph.map.Biome;
 import com.protolambda.blocktopograph.util.Noise;
 
 import java.nio.ByteBuffer;
 
-public class V1_0_TerrainChunkData extends TerrainChunkData {
+public class V1_1_TerrainChunkData extends TerrainChunkData {
 
 
     public volatile ByteBuffer terrainData, data2D;
@@ -23,15 +22,14 @@ public class V1_0_TerrainChunkData extends TerrainChunkData {
     public static final int POS_BLOCK_IDS = POS_VERSION + 1;
     public static final int POS_META_DATA = POS_BLOCK_IDS + vol;
     public static final int POS_SKY_LIGHT = POS_META_DATA + (vol >> 1);
-    public static final int POS_BLOCK_LIGHT = POS_SKY_LIGHT + (vol >> 1);
-    public static final int TERRAIN_LENGTH = POS_BLOCK_LIGHT + (vol >> 1);
+    public static final int TERRAIN_LENGTH = POS_SKY_LIGHT + (vol >> 1);
 
     public static final int POS_HEIGHTMAP = 0;
     // it looks like each biome takes 2 bytes, and the first 1 byte of every 2 bytes is always 0!?
     public static final int POS_BIOME_DATA = POS_HEIGHTMAP + area + area;
     public static final int DATA2D_LENGTH = POS_BIOME_DATA + area;
 
-    public V1_0_TerrainChunkData(Chunk chunk, byte subChunk) {
+    public V1_1_TerrainChunkData(Chunk chunk, byte subChunk) {
         super(chunk, subChunk);
     }
 
@@ -101,11 +99,6 @@ public class V1_0_TerrainChunkData extends TerrainChunkData {
             terrain[i] = (byte) 0;
         }
 
-        //fill blocklight with 0xff
-        for(; i < POS_BLOCK_LIGHT; i++){
-            terrain[i] = (byte) 0xff;
-        }
-
         //fill block-light with 0xff
         for(; i < TERRAIN_LENGTH; i++){
             terrain[i] = (byte) 0xff;
@@ -170,17 +163,13 @@ public class V1_0_TerrainChunkData extends TerrainChunkData {
 
     @Override
     public byte getBlockLightValue(int x, int y, int z) {
-        if (x >= chunkW || y >= chunkH || z >= chunkL || x < 0 || y < 0 || z < 0) {
-            return 0;
-        }
-        int offset = getOffset(x, y, z);
-        byte dualData = terrainData.get(POS_BLOCK_LIGHT + (offset >>> 1));
-        return (byte) ((offset & 1) == 1 ? (dualData >>> 4) & 0xf : dualData & 0xf);
+        //block light is not stored anymore
+        return 0;
     }
 
     @Override
     public boolean supportsBlockLightValues() {
-        return true;
+        return false;
     }
 
     /**

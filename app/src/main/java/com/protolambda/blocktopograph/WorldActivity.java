@@ -438,7 +438,7 @@ public class WorldActivity extends AppCompatActivity
                 changeMapType(MapType.END_HEIGHTMAP, Dimension.END);
                 break;
             case(R.id.nav_end_block_light):
-                changeMapType(MapType.END_HEIGHTMAP, Dimension.END);
+                changeMapType(MapType.END_BLOCK_LIGHT, Dimension.END);
                 break;
             case(R.id.nav_map_opt_toggle_grid):
                 //toggle the grid

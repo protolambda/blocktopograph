@@ -40,9 +40,10 @@ public class CaveRenderer implements MapRenderer {
         Version cVersion = chunk.getVersion();
 
         if(cVersion == Version.ERROR) return MapType.ERROR.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+        if(cVersion == Version.NULL) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
 
         boolean solid, intoSurface;
-        int id, meta, cavyness, layers, offset, streak;
+        int id, meta, cavyness, layers, offset;
         Block block;
         int x, y, z, subChunk, color, i, j, tX, tY, r, g, b;
 
@@ -60,7 +61,6 @@ public class CaveRenderer implements MapRenderer {
                 intoSurface = false;
                 cavyness = 0;
                 layers = 0;
-                streak = 0;
                 y = floorData.getHeightMapValue(x, z);
                 offset = y % cVersion.subChunkHeight;
                 subChunk = y / cVersion.subChunkHeight;

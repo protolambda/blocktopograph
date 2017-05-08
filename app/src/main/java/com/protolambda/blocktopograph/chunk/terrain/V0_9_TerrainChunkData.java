@@ -156,6 +156,11 @@ public class V0_9_TerrainChunkData extends TerrainChunkData {
         return (byte) ((offset & 1) == 1 ? (dualData >>> 4) & 0xf : dualData & 0xf);
     }
 
+    @Override
+    public boolean supportsBlockLightValues() {
+        return true;
+    }
+
     /**
      * Sets a block type, and also set the corresponding dirty table entry and set the saving flag.
      */

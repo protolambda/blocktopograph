@@ -40,6 +40,7 @@ public class NetherRenderer implements MapRenderer {
         Version cVersion = chunk.getVersion();
 
         if(cVersion == Version.ERROR) return MapType.ERROR.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+        if(cVersion == Version.NULL) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
 
         //bottom chunk must be present
         TerrainChunkData floorData = chunk.getTerrain((byte) 0);
@@ -96,7 +97,14 @@ public class NetherRenderer implements MapRenderer {
                     lightValue = (data != null && data.loadTerrain())
                             ? data.getBlockLightValue(x, y % cVersion.subChunkHeight, z)
                             : 0;
-                    lightShading = (float) lightValue / 15f + 1;
+
+                    //check if it is supported, default to full brightness to not lose details.
+                    if(data.supportsBlockLightValues()) {
+                        lightShading = (float) lightValue / 15f + 1;
+                    } else {
+                        lightShading = 2f;
+                    }
+
 
                     sliceShading = 0.5f + (((float) (caveceil - cavefloor)) / dimension.chunkH);
 

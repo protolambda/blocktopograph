@@ -2,18 +2,15 @@
 
 By @protolambda.
 
+**NOTE**: This is a *very* old legacy project! Code quality is awful, but I'm not going to rewrite the whole app for "fun".
+ Feel free to fork it and improve it yourself,
+  it is licensed under AGPL v3; reverse engineering the MCPE format is time consuming, share your updates.
+
 ## [Download on Google-Play](https://play.google.com/store/apps/details?id=com.protolambda.blocktopograph)
-
-### Screenshots
-
-//TODO screenshots
-
 
 ### Showcase website
 
-Screenshots, download links, roadmap etc. can all be found on [blocktopograph.protolambda.com](https://blocktopograph.protolambda.com).
-
-//TODO update website.
+Screenshots, download links, roadmap etc. can all be found on [blocktopograph.protolambda.com](http://blocktopograph.protolambda.com).
 
 
 ## Get-started

@@ -41,6 +41,7 @@ public class XRayRenderer implements MapRenderer {
         Version cVersion = chunk.getVersion();
 
         if(cVersion == Version.ERROR) return MapType.ERROR.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+        if(cVersion == Version.NULL) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
 
         //the bottom sub-chunk is sufficient to get heightmap data.
         TerrainChunkData data;
@@ -72,7 +73,7 @@ public class XRayRenderer implements MapRenderer {
                     for (y = 0; y < cVersion.subChunkHeight; y++) {
                         block = Block.getBlock(data.getBlockTypeId(x, y, z) & 0xff, 0);
 
-                        index2D = (z * rW) + x;
+                        index2D = ((z - bZ) * rW) + (x - bX);
                         if (block == null || block.id <= 1)
                             continue;
                         else if (block == Block.B_56_0_DIAMOND_ORE) {
@@ -88,7 +89,7 @@ public class XRayRenderer implements MapRenderer {
                             //else if(b == Block.LAVA || b == Block.STATIONARY_LAVA) bValue = 1;
                         else bValue = 0;
 
-                        if (bValue > minValue[(z * rW) + x]) {
+                        if (bValue > minValue[index2D]) {
                             minValue[index2D] = bValue;
                             bestBlock[index2D] = block;
                         }
@@ -101,8 +102,8 @@ public class XRayRenderer implements MapRenderer {
 
         for (z = bZ, tY = pY; z < eZ; z++, tY += pL) {
             for (x = bX, tX = pX; x < eX; x++, tX += pW) {
-                block = bestBlock[(z * rW) + x];
-                if (block == null) {
+                block = bestBlock[((z - bZ) * rW) + (x - bX)];
+                if (block == null || block.color == null) {
                     color = 0xff000000;
                 } else {
 

@@ -2,9 +2,7 @@ package com.protolambda.blocktopograph.map.renderer;
 
 import android.graphics.Bitmap;
 
-import com.protolambda.blocktopograph.Log;
 import com.protolambda.blocktopograph.chunk.Chunk;
-import com.protolambda.blocktopograph.chunk.ChunkData;
 import com.protolambda.blocktopograph.chunk.ChunkManager;
 import com.protolambda.blocktopograph.chunk.Version;
 import com.protolambda.blocktopograph.chunk.terrain.TerrainChunkData;
@@ -39,6 +37,7 @@ public class BlockLightRenderer implements MapRenderer {
         Version cVersion = chunk.getVersion();
 
         if(cVersion == Version.ERROR) return MapType.ERROR.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+        if(cVersion == Version.NULL) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
 
 
         int x, y, z, subChunk, color, i, j, tX, tY;
@@ -54,7 +53,7 @@ public class BlockLightRenderer implements MapRenderer {
             for (z = bZ; z < eZ; z++) {
                 for (x = bX; x < eX; x++) {
                     for (y = 0; y < cVersion.subChunkHeight; y++) {
-                        light[(z * rW) + x] += data.getBlockLightValue(x, y, z) & 0xff;
+                        light[((z - bZ) * rW) + (x - bX)] += data.getBlockLightValue(x, y, z) & 0xff;
                     }
                 }
             }
@@ -64,7 +63,7 @@ public class BlockLightRenderer implements MapRenderer {
         for (z = bZ, tY = pY; z < eZ; z++, tY += pL) {
             for (x = bX, tX = pX; x < eX; x++, tX += pW) {
 
-                l = light[(z * rW) + x];
+                l = light[((z - bZ) * rW) + (x - bX)];
                 l = l < 0 ? 0 : ((l > 0xff) ? 0xff : l);
 
                 color = (l << 16) | (l << 8) | (l) | 0xff000000;

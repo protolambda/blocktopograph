@@ -36,6 +36,7 @@ public class HeightmapRenderer implements MapRenderer {
         Version cVersion = chunk.getVersion();
 
         if(cVersion == Version.ERROR) return MapType.ERROR.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
+        if(cVersion == Version.NULL) return MapType.CHESS.renderer.renderToBitmap(cm, bm, dimension, chunkX, chunkZ, bX, bZ, eX, eZ, pX, pY, pW, pL);
 
         //the bottom sub-chunk is sufficient to get heightmap data.
         TerrainChunkData data = chunk.getTerrain((byte) 0);
